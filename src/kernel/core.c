@@ -99,7 +99,7 @@ acoral_thread_t *thread;
  */
 void init(void *args)
 {
-	printf("in init spg");
+	printf("in init spg\n");
 	acoral_comm_policy_data_t data;
 	acoral_ticks_init();
 	/*ticks中断初始化函数*/
@@ -118,6 +118,7 @@ void init(void *args)
 #ifdef CFG_SHELL
 	acoral_shell_init();
 #endif
+	printf("init done\n");
 }
 
 acoral_thread_t orig_thread;
@@ -129,7 +130,7 @@ acoral_thread_t orig_thread;
 void acoral_start()
 {
 	printf("in acoral_start\n");
-	orig_thread.console_id = -1;
+	orig_thread.console_id = 1;//SPG可删？
 	acoral_set_orig_thread(&orig_thread);
 	printf("before module init\n");
 	/*内核模块初始化*/
@@ -180,8 +181,6 @@ void acoral_start_os()
 	acoral_sched_init();
 	acoral_select_thread();
 	acoral_set_running_thread(acoral_ready_thread);
-	printf(acoral_cur_thread->name);
-	printf("init\n");//TODO2023.3.12这里不打印
 	HAL_SWITCH_TO(&acoral_cur_thread->stack);
 }
 

@@ -306,6 +306,7 @@ acoral_u32 acoral_msgctr_del(acoral_msgctr_t *pmsgctr, acoral_u32 flag)
 		// 释放资源
 		acoral_release_res((acoral_res_t *)pmsgctr);
 	}
+	return MSGCTR_SUCCED;
 }
 
 acoral_u32 acoral_msg_del(acoral_msg_t *pmsg)

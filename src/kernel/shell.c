@@ -139,7 +139,8 @@ void acoral_shell_enter(void *args){
 	cmd_buf=acoral_malloc(sizeof(BUF_SIZE));
 	while(1){
 		printf("\r\n");
-		printf("aCoral:>");
+		printf("aCoral:>\n");
+		gets(cmd_buf);
 		if(cmd_buf[0])
 			cmd_exe(cmd_buf);
 	}

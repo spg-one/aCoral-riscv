@@ -102,7 +102,7 @@ void * v_malloc(acoral_32 size){
 void v_free(void * p){
 	acoral_u32 * tp,*prev_tp;
 	acoral_8 * ctp;
-	acoral_u32 b_size,size;
+	acoral_u32 b_size,size=0;
 	if(mem_ctrl.mem_state==0)
 		return;
 	p=(acoral_8 *)p-4;

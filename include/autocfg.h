@@ -45,4 +45,9 @@
  */
 #define CFG_BAUD_RATE (115200)
 #define CFG_DEBUG 1
+
+
+
+#define ARCH_RISCV_FPU /*//SPG中断保护现场那里*/
+
 #endif

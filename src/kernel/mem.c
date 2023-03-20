@@ -103,13 +103,13 @@ acoral_err buddy_init(acoral_u32 start_adr, acoral_u32 end_adr)
 	start_adr += 3;
 	start_adr &= ~(4 - 1); //首地址四字节对齐
 	end_adr &= ~(4 - 1);   //尾地址四字节对齐
-	resize_size = BLOCK_SIZE;
+	resize_size = BASIC_BLOCK_SIZE;
 	end_adr = end_adr - sizeof(acoral_block_ctr_t);	 //减去内存控制块的大小，剩下的才是可分配内存
 	end_adr &= ~(4 - 1);							 //尾地址再进行一次四字节对齐
 	acoral_mem_ctrl = (acoral_block_ctr_t *)end_adr; //内存控制块的地址
 
 	//如果内存这么少，不适合分配
-	if (start_adr > end_adr || end_adr - start_adr < BLOCK_SIZE)
+	if (start_adr > end_adr || end_adr - start_adr < BASIC_BLOCK_SIZE)
 	{
 		acoral_mem_ctrl->state = MEM_NO_ALLOC;
 		return -1;
@@ -187,7 +187,7 @@ acoral_err buddy_init(acoral_u32 start_adr, acoral_u32 end_adr)
 	acoral_mem_ctrl->end_adr = start_adr + (num << BLOCK_SHIFT);
 	acoral_mem_ctrl->block_num = num;
 	acoral_mem_ctrl->free_num = num;
-	acoral_mem_ctrl->block_size = BLOCK_SIZE;
+	acoral_mem_ctrl->block_size = BASIC_BLOCK_SIZE;
 
 	i = 0;
 	max_num = (1 << level) - 1; //最大内存块层的每块内存大小
@@ -378,7 +378,7 @@ acoral_u32 buddy_malloc_size(acoral_u32 size)
 	acoral_u32 resize_size;
 	acoral_u8 level = 0;
 	acoral_u32 num = 1;
-	resize_size = BLOCK_SIZE;
+	resize_size = BASIC_BLOCK_SIZE;
 	if (acoral_mem_ctrl->state == MEM_NO_ALLOC)
 		return 0;
 	while (resize_size < size && level < acoral_mem_ctrl->level)
@@ -401,7 +401,7 @@ void *buddy_malloc(acoral_u32 size)
 	acoral_u32 resize_size;
 	acoral_u8 level = 0;
 	acoral_u32 num = 1;
-	resize_size = BLOCK_SIZE;
+	resize_size = BASIC_BLOCK_SIZE;
 	if (acoral_mem_ctrl->state == MEM_NO_ALLOC)
 		return NULL;
 	while (resize_size < size) //本层块大小不满足申请内存
@@ -438,7 +438,7 @@ void buddy_free(void *ptr)
 	}
 
 	//无效地址
-	if (ptr == NULL || adr < acoral_mem_ctrl->start_adr || adr + BLOCK_SIZE > acoral_mem_ctrl->end_adr)
+	if (ptr == NULL || adr < acoral_mem_ctrl->start_adr || adr + BASIC_BLOCK_SIZE > acoral_mem_ctrl->end_adr)
 	{
 		printf("Invalid Free Address:0x%x\n", (unsigned int)ptr);
 		return;

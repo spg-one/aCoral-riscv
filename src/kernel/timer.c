@@ -44,8 +44,8 @@ void acoral_set_ticks(acoral_time time){
 
 void acoral_ticks_init(){
   	ticks=0;                                      /*初始化滴答时钟计数器*/
-	clint_timer_register(acoral_ticks_entry,NULL);/*这个用于注册ticks的处理函数*/
 	HAL_TICKS_INIT();                            /*这个主要用于将用于ticks的时钟初始化*/
+	clint_timer_register(acoral_ticks_entry,NULL);/*这个用于注册ticks的处理函数*/
 	clint_timer_start(10,0);
 	return;
 }

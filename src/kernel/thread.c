@@ -338,7 +338,7 @@ acoral_err acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args),
 		thread->stack_size=stack_size;
 	}
 	thread->stack=(acoral_u32 *)((acoral_8 *)thread->stack_buttom+stack_size-4);
-	HAL_STACK_INIT(&thread->stack,route,exit,args);
+	thread->stack = HAL_STACK_INIT(thread->stack,route,exit,args);
 	
 	thread->data=NULL;
 	thread->state=ACORAL_THREAD_STATE_SUSPEND;

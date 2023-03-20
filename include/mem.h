@@ -31,7 +31,7 @@ void buddy_scan(void);
 ///基本内存块偏移量
 #define BLOCK_SHIFT 7 
 ///基本内存块大小 128b
-#define BLOCK_SIZE (1<<BLOCK_SHIFT)
+#define BASIC_BLOCK_SIZE (1<<BLOCK_SHIFT)
 ///内存系统状态定义：容量太小不可分配
 #define MEM_NO_ALLOC 0
 ///内存系统状态定义：容量足够可以分配

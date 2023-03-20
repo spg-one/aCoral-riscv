@@ -24,8 +24,6 @@
  */
 void acoral_intr_sys_init()
 {
-	acoral_u32 i;
-
 	/*关中断*/
 	acoral_intr_disable();
 

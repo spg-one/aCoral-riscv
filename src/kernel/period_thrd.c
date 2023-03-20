@@ -102,7 +102,7 @@ void period_delay_deal(){
 		tmp=tmp1;
 		if(thread->state&ACORAL_THREAD_STATE_SUSPEND){
 			thread->stack=(acoral_u32 *)((acoral_8 *)thread->stack_buttom+thread->stack_size-4);
-			HAL_STACK_INIT(&thread->stack,private_data->route,period_thread_exit,private_data->args);
+			thread->stack = HAL_STACK_INIT(thread->stack,private_data->route,period_thread_exit,private_data->args);
 			acoral_rdy_thread(thread);
 		}
 		period_thread_delay(thread,private_data->time);
