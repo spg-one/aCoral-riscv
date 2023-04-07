@@ -180,7 +180,7 @@ void acoral_start_os()
 {
 	acoral_sched_init();
 	acoral_select_thread();
-	acoral_set_running_thread(acoral_ready_thread);
+	acoral_set_running_thread(acoral_ready_thread);//SPG空指针
 	HAL_SWITCH_TO(&acoral_cur_thread->stack);
 }
 

@@ -159,7 +159,6 @@ void acoral_res_sys_init(void);
 void acoral_pool_ctrl_init(acoral_pool_ctrl_t *pool_ctrl);
 
 /*mem.h*/
-#define acoral_mmu_init() HAL_MEM_INIT()
 #define acoral_malloc(size) buddy_malloc(size)
 #define acoral_free(ptr) buddy_free(ptr)
 #define acoral_malloc_size(size) buddy_malloc_size(size)
