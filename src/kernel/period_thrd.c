@@ -17,11 +17,18 @@ acoral_id period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *
 	if(thread->policy==ACORAL_SCHED_POLICY_PERIOD){
 		policy_data=(acoral_period_policy_data_t *)data;
 		prio=policy_data->prio;
-		if(policy_data->prio_type==ACORAL_BASE_PRIO){
-			prio+=ACORAL_BASE_PRIO_MIN;
-			if(prio>=ACORAL_BASE_PRIO_MAX)
-				prio=ACORAL_BASE_PRIO_MAX-1;
+		if(policy_data->prio_type==ACORAL_NONHARD_PRIO){
+			prio+=ACORAL_NONHARD_RT_PRIO_MAX;
+			if(prio>=ACORAL_NONHARD_RT_PRIO_MIN)
+				prio=ACORAL_NONHARD_RT_PRIO_MIN-1;
 		}
+		//SPG加上硬实时判断
+		// else{
+		// 	prio += ACORAL_HARD_RT_PRIO_MAX;
+		// 	if(prio > ACORAL_HARD_RT_PRIO_MIN){
+		// 		prio = ACORAL_HARD_RT_PRIO_MIN;
+		// }
+		// }
 		thread->prio=prio;
 		private_data=(period_policy_data_t *)acoral_malloc2(sizeof(period_policy_data_t));
 		if(private_data==NULL){

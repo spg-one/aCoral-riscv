@@ -1,6 +1,9 @@
 #ifndef ACORAL_LIST_H
 #define ACORAL_LIST_H
-#include"comm.h"
+
+#define offsetof(TYPE, MEMBER) ((acoral_u32) &((TYPE *)0)->MEMBER)
+#define container_of(ptr, type, member) ((type *)((acoral_8 *)ptr - offsetof(type,member)))
+
 #define list_entry(ptr, type, member) \
 	container_of(ptr, type, member)
 #define acoral_list_init(list) acoral_init_list(list)

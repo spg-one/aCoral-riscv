@@ -10,7 +10,7 @@ void display_thread(acoral_32 argc,acoral_char **argv){
 	head=&acoral_threads_queue.head;
 	printf("\t\tSystem Thread Information\r\n");
 	printf("------------------------------------------------------\r\n");
-	printf("Name\t\tType\t\tConsole\t\tState\r\n");
+	printf("Name\t\tType\t\tState\t\tPrio\r\n");
 	HAL_ENTER_CRITICAL();
 
 	for(tmp=head->next;tmp!=head;tmp=tmp->next){
@@ -26,7 +26,6 @@ void display_thread(acoral_32 argc,acoral_char **argv){
 			default:
 				break;
 		}
-		printf("%d\t\t",thread->console_id);
 		if(thread->state&ACORAL_THREAD_STATE_RUNNING)
 				printf("Running\t\t");
 		else if(thread->state&ACORAL_THREAD_STATE_READY)
@@ -39,6 +38,8 @@ void display_thread(acoral_32 argc,acoral_char **argv){
 				printf("Freeze\t\t");
 		else
 				printf("Error\t\t");
+		
+		printf("%d\t\t",thread->prio);
 		printf("\r\n");
 	}
 	printf("------------------------------------------------------\r\n");

@@ -2,14 +2,15 @@
  * @file thread.h
  * @author 王彬浩 (SPGGOGOGO@outlook.com)
  * @brief kernel层，线程优先级、控制块定义，线程管理函数声明
- * @version 1.0
- * @date 2022-06-24
+ * @version 1.1
+ * @date 2023-04-19
  * @copyright Copyright (c) 2022
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
  *   <tr><td> 0.1 <td>pegasus <td>2010-07-19 <td>增加timeout链表，用来处理超时，挂g_timeout_queue
  *   <tr><td> 1.0 <td>王彬浩 <td> 2022-06-24 <td>Standardized 
+ * 	 <tr><td> 1.0 <td>王彬浩 <td> 2023-04-19 <td>use enum 
  *  </table>
  */
 
@@ -22,32 +23,37 @@
 #include "queue.h"
 #include "event.h"
 
-#define ACORAL_BASE_PRIO  1<<1
-#define ACORAL_ABSOLUTE_PRIO 1<<2 
+///41。总共有40个线程，就有0~40共41个优先级
+#define ACORAL_MAX_PRIO_NUM ((CFG_MAX_THREAD + 1) & 0xff)
+///aCoral最低优先级40
+#define ACORAL_MINI_PRIO CFG_MAX_THREAD
 
-#define ACORAL_IDLE_PRIO ACORAL_MINI_PRIO
-#define ACORAL_TMP_PRIO ACORAL_MINI_PRIO-1
-#define ACORAL_STAT_PRIO ACORAL_MINI_PRIO-2
-#define ACORAL_DAEMON_PRIO ACORAL_MINI_PRIO-3
+enum acoralPrioEnum{
+	ACORAL_INIT_PRIO,	//init线程独有的0优先级
+	ACORAL_MAX_PRIO,	//aCoral系统中允许的最高优先级
+	ACORAL_HARD_RT_PRIO_MAX,	//硬实时任务最高优先级
+	ACORAL_HARD_RT_PRIO_MIN = ACORAL_HARD_RT_PRIO_MAX+CFG_HARD_RT_PRIO_NUM,	//硬实时任务最低优先级
+	ACORAL_NONHARD_RT_PRIO_MAX,	//非硬实时任务最高优先级
 
-#define ACORAL_HARD_RT_PRIO_MIN ACORAL_MAX_PRIO+1
-#define ACORAL_HARD_RT_PRIO_MAX ACORAL_HARD_RT_PRIO_MIN+CFG_HARD_RT_PRIO_NUM
+	ACORAL_DAEMON_PRIO = ACORAL_MINI_PRIO-2,	//daemon回收线程专用优先级
+	ACORAL_NONHARD_RT_PRIO_MIN,	//非硬实时任务最低优先级
+	ACORAL_IDLE_PRIO	//idle线程专用优先级，也是系统最低优先级
+};
 
+enum acoralPrioTypeEnum{
+	ACORAL_NONHARD_PRIO,	//非硬实时任务的优先级，会将tcb中的prio加上ACORAL_NONHARD_RT_PRIO_MAX
+	ACORAL_HARD_PRIO	//硬实时任务优先级，会将tcb中的prio加上ACORAL_HARD_RT_PRIO_MAX
+};
 
-#define ACORAL_BASE_PRIO_MAX ACORAL_TMP_PRIO
-
-#define ACORAL_BASE_PRIO_MIN ACORAL_HARD_RT_PRIO_MAX
-
-
-#define ACORAL_THREAD_STATE_MINI  0
-#define ACORAL_THREAD_STATE_READY (1<<ACORAL_THREAD_STATE_MINI)
-#define ACORAL_THREAD_STATE_SUSPEND (1<<(ACORAL_THREAD_STATE_MINI+1))
-#define ACORAL_THREAD_STATE_RUNNING (1<<(ACORAL_THREAD_STATE_MINI+2))
-#define ACORAL_THREAD_STATE_EXIT (1<<(ACORAL_THREAD_STATE_MINI+3))
-#define ACORAL_THREAD_STATE_RELEASE (1<<(ACORAL_THREAD_STATE_MINI+4))
-#define ACORAL_THREAD_STATE_DELAY (1<<(ACORAL_THREAD_STATE_MINI+5))
-#define ACORAL_THREAD_STATE_MOVE (1<<(ACORAL_THREAD_STATE_MINI+6))
-#define acoral_init_stack() HAL_INIT_STACK()
+enum acoralThreadState{
+	ACORAL_THREAD_STATE_READY = 1,
+	ACORAL_THREAD_STATE_SUSPEND = 1<<1,
+	ACORAL_THREAD_STATE_RUNNING = 1<<2,
+	ACORAL_THREAD_STATE_EXIT = 1<<3,
+	ACORAL_THREAD_STATE_RELEASE = 1<<4,
+	ACORAL_THREAD_STATE_DELAY = 1<<5,
+	ACORAL_THREAD_STATE_MOVE = 1<<6
+};
 
 /**
  * 
@@ -71,7 +77,7 @@ typedef struct{
 	acoral_u32 stack_size;
 	acoral_32 delay;
 	acoral_char *name;
-	acoral_id console_id;
+	acoral_id console_id; ///<deprecated
 	void*	private_data;
 	void*	data;
 }acoral_thread_t;
@@ -99,7 +105,6 @@ void acoral_unrdy_thread(acoral_thread_t *thread);
 void acoral_rdy_thread(acoral_thread_t *thread);
 void acoral_thread_move2_tail_by_id(acoral_id thread_id);
 void acoral_thread_move2_tail(acoral_thread_t *thread);
-void acoral_set_thread_console(acoral_id id);
 extern acoral_queue_t acoral_threads_queue;
 void acoral_thread_change_prio(acoral_thread_t* thread, acoral_u32 prio);
 void acoral_change_prio_self(acoral_u32 prio);

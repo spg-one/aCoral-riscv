@@ -330,8 +330,8 @@ acoral_thread_t *acoral_alloc_thread(){
 acoral_err acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args),void (*exit)(void),void *args){
 	acoral_u32 stack_size=thread->stack_size;
 	if(thread->stack_buttom==NULL){
-		if(stack_size<ACORAL_MIN_STACK_SIZE)
-			stack_size=ACORAL_MIN_STACK_SIZE;
+		if(stack_size<CFG_MIN_STACK_SIZE)
+			stack_size=CFG_MIN_STACK_SIZE;
 		thread->stack_buttom=(acoral_u32 *)acoral_malloc(stack_size);
 		if(thread->stack_buttom==NULL)
 			return ACORAL_ERR_THREAD_NO_STACK;
@@ -342,8 +342,7 @@ acoral_err acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args),
 	
 	thread->data=NULL;
 	thread->state=ACORAL_THREAD_STATE_SUSPEND;
-	/*继承父线程的console_id*/
-	thread->console_id=acoral_cur_thread->console_id;
+	
 	acoral_init_list(&thread->waiting);
 	acoral_init_list(&thread->ready);
 	acoral_init_list(&thread->timeout);
@@ -366,12 +365,8 @@ void acoral_thread_pool_init(){
 		acoral_thread_pool_ctrl.num_per_pool=20;
 	else
 		acoral_thread_pool_ctrl.num_per_pool=CFG_MAX_THREAD;
-	acoral_thread_pool_ctrl.max_pools=ACORAL_MAX_THREAD/acoral_thread_pool_ctrl.num_per_pool;
+	acoral_thread_pool_ctrl.max_pools=CFG_MAX_THREAD/acoral_thread_pool_ctrl.num_per_pool;
 	acoral_pool_ctrl_init(&acoral_thread_pool_ctrl);
-}
-
-void acoral_set_thread_console(acoral_id id){
-	acoral_cur_thread->console_id=id;	
 }
 
 void acoral_sched_mechanism_init(){

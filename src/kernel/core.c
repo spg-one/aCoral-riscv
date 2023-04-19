@@ -108,7 +108,7 @@ void init(void *args)
 	/*创建后台服务进程*/
 	acoral_init_list(&acoral_res_release_queue.head);
 	data.prio = ACORAL_DAEMON_PRIO;
-	data.prio_type = ACORAL_ABSOLUTE_PRIO;
+	data.prio_type = ACORAL_HARD_PRIO;
 	daemon_id = acoral_create_thread(daem, DAEM_STACK_SIZE, NULL, "daemon", NULL, ACORAL_SCHED_POLICY_COMM, &data);
 	thread = (acoral_thread_t *)acoral_get_res_by_id(daemon_id);
 	if (daemon_id == -1)
@@ -130,7 +130,6 @@ acoral_thread_t orig_thread;
 void acoral_start()
 {
 	printf("in acoral_start\n");
-	orig_thread.console_id = 1;//SPG可删？
 	acoral_set_orig_thread(&orig_thread);
 	printf("before module init\n");
 	/*内核模块初始化*/
@@ -152,7 +151,7 @@ void acoral_core_cpu_start()
 	/*创建空闲线程*/
 	acoral_start_sched = false;
 	data.prio = ACORAL_IDLE_PRIO;
-	data.prio_type = ACORAL_ABSOLUTE_PRIO;
+	data.prio_type = ACORAL_HARD_PRIO;
 	idle_id = acoral_create_thread(idle, IDLE_STACK_SIZE, NULL, "idle", NULL, ACORAL_SCHED_POLICY_COMM, &data);
 	if (idle_id == -1)
 	{

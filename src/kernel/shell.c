@@ -123,19 +123,14 @@ void acoral_shell_init(void){
 	tail_cmd=NULL;
 	cmd_init();
 
-	data.prio=ACORAL_TMP_PRIO;
-	data.prio_type=ACORAL_ABSOLUTE_PRIO;
-	acoral_create_thread(acoral_shell_enter,SHELL_STACK_SIZE,(void *)acoral_cur_thread->console_id,"shell",NULL,ACORAL_SCHED_POLICY_COMM,&data);
+	data.prio=ACORAL_NONHARD_RT_PRIO_MIN;
+	data.prio_type=ACORAL_HARD_PRIO;
+	acoral_create_thread(acoral_shell_enter,SHELL_STACK_SIZE,NULL,"shell",NULL,ACORAL_SCHED_POLICY_COMM,&data);
 }
 
 
 void acoral_shell_enter(void *args){
 	acoral_char *cmd_buf;
-	acoral_set_thread_console((acoral_id)args);
-	if(acoral_cur_thread->console_id<0){
-		printf("The thread have no Console\n");
-		return;
-	}
 	cmd_buf=acoral_malloc(sizeof(BUF_SIZE));
 	while(1){
 		printf("\r\n");

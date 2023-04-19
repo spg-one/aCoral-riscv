@@ -32,7 +32,7 @@ HAL_SWITCH_TO:
     csrw mstatus, a0
     j    HAL_CTX_SWITCH_EXIT
 
-HAL_CONTEXT_SWITCH:
+HAL_CONTEXT_SWITCH: #//SPG要不要加@function？
 #ifdef ARCH_RISCV_FPU
     addi    sp, sp, -32 * FREGBYTES
 

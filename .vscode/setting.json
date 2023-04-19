@@ -1,0 +1,12 @@
+{
+
+    "multiCommand.commands": [
+        {
+            "command": "multiCommand.enterExec",
+            "sequence": [
+                "repl.action.acceptInput",
+                {"command": "editor.action.insertSnippet", "args": {"snippet": "-exec "}}
+            ]
+        }
+    ]
+}

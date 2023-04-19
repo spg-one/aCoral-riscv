@@ -52,7 +52,7 @@ acoral_id create_comm_thread(void (*route)(void *args),acoral_u32 stack_size,voi
 	thread->stack_buttom=NULL;
         /*设置线程的优先级*/
 	policy_ctrl.prio=prio;
-	policy_ctrl.prio_type=ACORAL_BASE_PRIO;
+	policy_ctrl.prio_type=ACORAL_NONHARD_PRIO;
 	thread->policy=ACORAL_SCHED_POLICY_COMM;
 	return comm_policy_thread_init(thread,route,args,&policy_ctrl);
 }
@@ -71,11 +71,18 @@ acoral_id comm_policy_thread_init(acoral_thread_t *thread,void (*route)(void *ar
 	acoral_comm_policy_data_t *policy_data;
 	policy_data=(acoral_comm_policy_data_t *)data;
 	prio=policy_data->prio;
-	if(policy_data->prio_type==ACORAL_BASE_PRIO){
-		prio+=ACORAL_BASE_PRIO_MIN;
-		if(prio>=ACORAL_BASE_PRIO_MAX)
-			prio=ACORAL_BASE_PRIO_MAX-1;
+	if(policy_data->prio_type==ACORAL_NONHARD_PRIO){
+		prio+=ACORAL_NONHARD_RT_PRIO_MAX;
+		if(prio>=ACORAL_NONHARD_RT_PRIO_MIN)
+			prio=ACORAL_NONHARD_RT_PRIO_MIN;
 	}
+	//SPG加上硬实时判断
+	// else{
+	// 	prio += ACORAL_HARD_RT_PRIO_MAX;
+	// 	if(prio > ACORAL_HARD_RT_PRIO_MIN){
+	// 		prio = ACORAL_HARD_RT_PRIO_MIN;
+	// 	}
+	// }
 	thread->prio=prio;
 	if(acoral_thread_init(thread,route,acoral_thread_exit,args)!=0){
 		printf("No thread stack:%s\n",thread->name);
