@@ -1,7 +1,7 @@
-#include"thread.h"
-#include"policy.h"
-#include"hal.h"
-#include"../include/shell.h"
+#include "thread.h"
+#include "policy.h"
+#include "hal.h"
+#include "shell.h"
 #include <stdio.h>
 
 void display_thread(acoral_32 argc,acoral_char **argv){	

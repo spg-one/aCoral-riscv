@@ -26,7 +26,7 @@ acoral_evt_t *acoral_alloc_evt(){
 }
 
 void acoral_evt_init(acoral_evt_t *evt){
-	acoral_list_init(&evt->wait_queue.head);
+	acoral_init_list(&evt->wait_queue.head);
 }
 
 bool acoral_evt_queue_empty(acoral_evt_t *evt){

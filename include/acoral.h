@@ -4,7 +4,7 @@
  * @brief aCoral总头文件，供aCoral用户使用
  * @version 1.0
  * @date 2022-07-17
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 

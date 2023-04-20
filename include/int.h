@@ -4,7 +4,7 @@
  * @brief kernel层，aCoral中断相关头文件
  * @version 1.0
  * @date 2022-07-08
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
@@ -14,12 +14,7 @@
  */
 #ifndef ACORAL_INT_H
 #define ACORAL_INT_H
-#include"type.h"
-
-//中断类型
-#define ACORAL_COMM_INTR 1		///<普通中断，会自动调用acoral_intr_ctr_t中的enter成员清除中断，用户只需要关心isr就行
-#define ACORAL_EXPERT_INTR 2	///<专家中断，不会调用enter成员，需要在isr中手动清除中断，如DM9000网卡
-#define ACORAL_RT_INTR 3		///<实时中断，不知道是什么
+#include "type.h"
 
 /**
  * @brief 中断结构体

@@ -1,7 +1,7 @@
 #ifndef _ACORAL_SEM_H
 #define _ACORAL_SEM_H
-#include"type.h"
-#include"event.h"
+#include "type.h"
+#include "event.h"
 
 #define SEM_SUCCED              0
 #define SEM_THREAD_SUSPEND      1

@@ -4,7 +4,7 @@
  * @brief kernel层，定时器相关头文件
  * @version 1.0
  * @date 2022-07-20
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
@@ -15,9 +15,9 @@
 
 #ifndef ACORAL_TIMER_H
 #define ACORAL_TIMER_H
-#include <autocfg.h>
+#include "autocfg.h"
 #include "type.h"
-#include <core.h>
+#include "core.h"
 #include "queue.h"
 #include "thread.h"
 #ifndef CFG_CMP

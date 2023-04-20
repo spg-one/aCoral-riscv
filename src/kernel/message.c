@@ -5,13 +5,13 @@
 #include "lsched.h"
 #include "int.h"
 #include "timer.h"
-#include <message.h>
-#include <error.h>
+#include "message.h"
+#include "error.h"
 #include <stdio.h>
 
 acoral_pool_ctrl_t acoral_msgctr_pool_ctrl;
 acoral_pool_ctrl_t acoral_msg_pool_ctrl;
-acoral_queue_t g_msgctr_header;
+acoral_queue_t g_msgctr_header; ///<全局-用来串系统中所有的acoral_msgctr_t块，在中断函数中处理ttl和timeout，create acoral_msgctr_t 时加到该链表中
 /*=============================
  *
  *  mssage 机制缓冲池初始化

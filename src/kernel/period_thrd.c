@@ -13,7 +13,7 @@ acoral_queue_t period_delay_queue;
 acoral_id period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
 	acoral_u32 prio;
 	acoral_period_policy_data_t *policy_data;
-	period_policy_data_t *private_data;
+	period_private_data_t *private_data;
 	if(thread->policy==ACORAL_SCHED_POLICY_PERIOD){
 		policy_data=(acoral_period_policy_data_t *)data;
 		prio=policy_data->prio;
@@ -30,7 +30,7 @@ acoral_id period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *
 		// }
 		// }
 		thread->prio=prio;
-		private_data=(period_policy_data_t *)acoral_malloc2(sizeof(period_policy_data_t));
+		private_data=(period_private_data_t *)acoral_malloc2(sizeof(period_private_data_t));
 		if(private_data==NULL){
 			printf("No level2 mem space for private_data:%s\n",thread->name);
 			acoral_enter_critical();
@@ -53,7 +53,7 @@ acoral_id period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *
         /*将线程就绪，并重新调度*/
 	acoral_resume_thread(thread);
 	acoral_enter_critical();
-	period_thread_delay(thread,((period_policy_data_t *)thread->private_data)->time);
+	period_thread_delay(thread,((period_private_data_t *)thread->private_data)->time);
 	acoral_exit_critical();
 	return thread->res.id;
 }
@@ -92,7 +92,7 @@ void period_thread_delay(acoral_thread_t* thread,acoral_time time){
 void period_delay_deal(){
 	acoral_list_t *tmp,*tmp1,*head;
 	acoral_thread_t * thread;
-	period_policy_data_t * private_data;
+	period_private_data_t * private_data;
 	head=&period_delay_queue.head;
 	if(acoral_list_empty(head))
 	    	return;
@@ -122,7 +122,7 @@ void period_thread_exit(){
 
 acoral_sched_policy_t period_policy;
 void period_policy_init(void){
-	acoral_list_init(&period_delay_queue.head);
+	acoral_init_list(&period_delay_queue.head);
 	period_policy.type=ACORAL_SCHED_POLICY_PERIOD;
 	period_policy.policy_thread_init=period_policy_thread_init;
 	period_policy.policy_thread_release=period_policy_thread_release;

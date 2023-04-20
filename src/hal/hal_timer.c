@@ -4,7 +4,7 @@
  * @brief hal层，定时器硬件初始化代码
  * @version 1.0
  * @date 2022-07-17
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 

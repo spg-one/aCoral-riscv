@@ -4,7 +4,7 @@
  * @brief lib库，aCoral队列结构体定义
  * @version 1.0
  * @date 2022-07-28
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
@@ -15,8 +15,8 @@
 
 #ifndef QUEUE_H_
 #define QUEUE_H_
-#include"list.h"
-#include<core.h>
+#include "list.h"
+#include "core.h"
 
 typedef struct {
 	acoral_list_t head;

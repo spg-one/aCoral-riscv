@@ -4,7 +4,7 @@
  * @brief hal层，中断二级入口、中断开关以及中断初始化c代码
  * @version 1.0
  * @date 2022-06-23
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  *
  * <table>
  * <tr><th> 版本 <th>作者 <th>日期 <th>修改内容

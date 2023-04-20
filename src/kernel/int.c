@@ -4,7 +4,7 @@
  * @brief kernel层，中断相关函数
  * @version 1.0
  * @date 2022-07-24
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 

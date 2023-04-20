@@ -4,7 +4,7 @@
  * @brief kernel层，普通线程头文件
  * @version 1.0
  * @date 2022-07-23
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
@@ -14,8 +14,8 @@
  */
 #ifndef COMM_THRD_H
 #define COMM_THRD_H
-#include"type.h"
-#include"thread.h"
+#include "type.h"
+#include "thread.h"
 
 /**
  * @brief 普通线程调度相关的数据

@@ -4,7 +4,7 @@
  * @brief kernel层，线程机制相关函数
  * @version 1.0
  * @date 2022-07-08
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
@@ -17,7 +17,7 @@
 #include "hal.h"
 #include "queue.h"
 #include "lsched.h"
-#include <error.h>
+#include "error.h"
 #include "timer.h"
 #include "mem.h"
 #include "thread.h"
@@ -42,7 +42,7 @@ acoral_pool_ctrl_t acoral_thread_pool_ctrl;
  * @param data 线程策略数据
  * @return acoral_id 返回线程id
  */
-acoral_id create_thread_ext(void (*route)(void *args),acoral_u32 stack_size,void *args,acoral_char *name,void *stack,acoral_u32 sched_policy,void *data){
+acoral_id acoral_create_thread(void (*route)(void *args),acoral_u32 stack_size,void *args,acoral_char *name,void *stack,acoral_u32 sched_policy,void *data){
 	acoral_thread_t *thread;
         /*分配tcb数据块*/
 	thread=acoral_alloc_thread();

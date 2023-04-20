@@ -1,8 +1,8 @@
-#include"type.h"
-#include"hal.h"
-#include"queue.h"
-#include"thread.h"
-#include"policy.h"
+#include "type.h"
+#include "hal.h"
+#include "queue.h"
+#include "thread.h"
+#include "policy.h"
 #include "int.h"
 #include <stdio.h>
 #include "comm_thrd.h"
@@ -61,7 +61,7 @@ void acoral_policy_thread_release(acoral_thread_t *thread){
 
 
 void acoral_sched_policy_init(){
-	acoral_list_init(&policy_list.head);
+	acoral_init_list(&policy_list.head);
 	comm_policy_init();
 
 #ifdef CFG_THRD_PERIOD

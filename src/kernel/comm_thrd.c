@@ -4,7 +4,7 @@
  * @brief kernel层，普通（先来先服务线程）策略头文件
  * @version 1.0
  * @date 2022-07-08
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 

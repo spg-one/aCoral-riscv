@@ -4,7 +4,7 @@
  * @brief hal层，线程硬件相关代码
  * @version 1.0
  * @date 2022-07-22
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
@@ -12,7 +12,7 @@
  *   <tr><td> 1.0 <td>王彬浩 <td> 2022-07-22 <td>Standardized 
  *  </table>
  */
-#include"type.h"
+#include "type.h"
 #include "hal_thread.h"
 #include <stdio.h>
 /**

@@ -6,7 +6,7 @@
  * @author 王彬浩 (SPGGOGOGO@outlook.com)
  * @version 1.0
  * @date 2022-06-24
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
@@ -21,7 +21,7 @@
  * @brief kernel层，aCoral内核初始化文件，紧接start.S
  * @version 1.0
  * @date 2022-07-04
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory 
  *  <table> 
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 

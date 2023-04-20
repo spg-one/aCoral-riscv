@@ -4,7 +4,7 @@
  * @brief kernel层，aCoral调度相关函数
  * @version 1.0
  * @date 2022-07-28
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  * @revisionHistory
  *  <table>
  *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
@@ -19,11 +19,11 @@
 #include "lsched.h"
 #include "queue.h"
 #include "list.h"
-#include <bitops.h>
+#include "bitops.h"
 
 acoral_u8 acoral_need_sched; ///< aCoral是否需要调度标志，仅当aCoral就绪队列acoral_ready_queues有线程加入或被取下时，该标志被置为true；仅当aCoral在调度线程时，该标志位被置为false
 acoral_u8 sched_lock = 1;	 ///< aCoral初始化完成之前，调度都是被上锁的，即不允许调度。
-acoral_thread_t *running_thread, *ready_thread;
+acoral_thread_t *acoral_cur_thread, *acoral_ready_thread;
 
 static acoral_rdy_queue_t acoral_ready_queues;
 /* 之前是static acoral_rdy_queue_t acoral_ready_queues[HAL_MAX_CPU],*/
@@ -83,14 +83,14 @@ void acoral_sched_init()
 
 void acoral_set_orig_thread(acoral_thread_t *thread)
 {
-	running_thread = thread;
+	acoral_cur_thread = thread;
 }
 
 void acoral_set_running_thread(acoral_thread_t *thread)
 {
-	running_thread->state &= ~ACORAL_THREAD_STATE_RUNNING;
+	acoral_cur_thread->state &= ~ACORAL_THREAD_STATE_RUNNING;
 	thread->state |= ACORAL_THREAD_STATE_RUNNING;
-	running_thread = thread;
+	acoral_cur_thread = thread;
 }
 
 /*================================
@@ -148,7 +148,7 @@ void acoral_sched()
 	if (acoral_intr_nesting)
 		return;
 
-	if (acoral_sched_is_lock)
+	if (sched_lock)
 		return;
 	/*如果还没有开始调度，则返回*/
 	if (!acoral_start_sched)
