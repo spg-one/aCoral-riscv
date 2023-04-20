@@ -1,4 +1,4 @@
-#include "type.h"
+
 #include "event.h"
 #include "hal.h"
 #include "thread.h"
@@ -75,7 +75,7 @@ void acoral_msgctr_queue_add(acoral_msgctr_t *msgctr,
  *
  *   消息创建
  *==================================*/
-acoral_msgctr_t *acoral_msgctr_create(acoral_u32 *err)
+acoral_msgctr_t *acoral_msgctr_create(unsigned int *err)
 {
 	acoral_msgctr_t *msgctr;
 
@@ -97,8 +97,8 @@ acoral_msgctr_t *acoral_msgctr_create(acoral_u32 *err)
 }
 
 acoral_msg_t *acoral_msg_create(
-	acoral_u32 n, acoral_u32 *err, acoral_u32 id,
-	acoral_u32 nTtl /* = 0*/, void *dat /*= NULL*/)
+	unsigned int n, unsigned int *err, unsigned int id,
+	unsigned int nTtl /* = 0*/, void *dat /*= NULL*/)
 {
 	acoral_msg_t *msg;
 
@@ -119,7 +119,7 @@ acoral_msg_t *acoral_msg_create(
  *
  *   消息发送
  *===================================*/
-acoral_u32 acoral_msg_send(acoral_msgctr_t *msgctr, acoral_msg_t *msg)
+unsigned int acoral_msg_send(acoral_msgctr_t *msgctr, acoral_msg_t *msg)
 {
 	/*	if (acoral_intr_nesting > 0)
 			return MST_ERR_INTR;
@@ -173,9 +173,9 @@ acoral_u32 acoral_msg_send(acoral_msgctr_t *msgctr, acoral_msg_t *msg)
  *  消息接收
  *===================================*/
 void *acoral_msg_recv(acoral_msgctr_t *msgctr,
-					  acoral_u32 id,
-					  acoral_time timeout,
-					  acoral_u32 *err)
+					  unsigned int id,
+					  unsigned int timeout,
+					  unsigned int *err)
 {
 	void *dat;
 	acoral_list_t *p, *q;
@@ -240,7 +240,7 @@ void *acoral_msg_recv(acoral_msgctr_t *msgctr,
 		/*-----------------*/
 		acoral_enter_critical();
 
-		if (timeout > 0 && (acoral_32)cur->delay <= 0)
+		if (timeout > 0 && (int)cur->delay <= 0)
 			break;
 	}
 
@@ -260,7 +260,7 @@ void *acoral_msg_recv(acoral_msgctr_t *msgctr,
  *
  *  消息删除
  *===================================*/
-acoral_u32 acoral_msgctr_del(acoral_msgctr_t *pmsgctr, acoral_u32 flag)
+unsigned int acoral_msgctr_del(acoral_msgctr_t *pmsgctr, unsigned int flag)
 {
 	acoral_list_t *p, *q;
 	acoral_thread_t *thread;
@@ -309,7 +309,7 @@ acoral_u32 acoral_msgctr_del(acoral_msgctr_t *pmsgctr, acoral_u32 flag)
 	return MSGCTR_SUCCED;
 }
 
-acoral_u32 acoral_msg_del(acoral_msg_t *pmsg)
+unsigned int acoral_msg_del(acoral_msg_t *pmsg)
 {
 	if (NULL != pmsg)
 		acoral_release_res((acoral_res_t *)pmsg);

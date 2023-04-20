@@ -7,7 +7,7 @@
  *
  *============================
  */
-#include "type.h"
+
 #include "event.h"
 #include "thread.h"
 #include "lsched.h"
@@ -20,7 +20,7 @@
 extern void acoral_evt_queue_del(acoral_thread_t *thread);
 extern void acoral_evt_queue_add(acoral_evt_t *evt,acoral_thread_t *new);
 acoral_thread_t *acoral_evt_high_thread(acoral_evt_t *evt);
-acoral_u32 *acoral_sem_init(acoral_evt_t *evt,acoral_u32 semNum)
+unsigned int *acoral_sem_init(acoral_evt_t *evt,unsigned int semNum)
 {
 	if (NULL == evt)
 	{
@@ -37,7 +37,7 @@ acoral_u32 *acoral_sem_init(acoral_evt_t *evt,acoral_u32 semNum)
  *   the creation of signal
  *   计算信号量的创建
  *============================*/
-acoral_evt_t *acoral_sem_create(acoral_u32 semNum)
+acoral_evt_t *acoral_sem_create(unsigned int semNum)
 {
 	acoral_evt_t *evt;
 	evt = acoral_alloc_evt();
@@ -57,7 +57,7 @@ acoral_evt_t *acoral_sem_create(acoral_u32 semNum)
  *  the deletion of singal 
  *   计算信号量的删除
  *============================*/
-acoral_u32 acoral_sem_del(acoral_evt_t *evt, acoral_u32 opt)
+unsigned int acoral_sem_del(acoral_evt_t *evt, unsigned int opt)
 {
 	acoral_thread_t     *thread;
 	if (acoral_intr_nesting)
@@ -93,7 +93,7 @@ acoral_u32 acoral_sem_del(acoral_evt_t *evt, acoral_u32 opt)
  *  desp: count <= SEM_RES_AVAI  信号量有效 a++
  *        count >  SEM_RES_AVAI  信号量无效 a++ && thread suspend
  *============================*/
-acoral_u32 acoral_sem_trypend(acoral_evt_t *evt)
+unsigned int acoral_sem_trypend(acoral_evt_t *evt)
 {
 	if (acoral_intr_nesting)
 	{
@@ -112,7 +112,7 @@ acoral_u32 acoral_sem_trypend(acoral_evt_t *evt)
 
 	/* 计算信号量处理*/
 	acoral_enter_critical();
-	if ((acoral_8)evt->count <= SEM_RES_AVAI)
+	if ((char)evt->count <= SEM_RES_AVAI)
 	{   /* available*/
 		evt->count++;
 		acoral_exit_critical();
@@ -129,7 +129,7 @@ acoral_u32 acoral_sem_trypend(acoral_evt_t *evt)
  *  desp: count <= SEM_RES_AVAI  信号量有效 a++
  *        count >  SEM_RES_AVAI  信号量无效 a++ && thread suspend
  *============================*/
-acoral_u32 acoral_sem_pend(acoral_evt_t *evt, acoral_time timeout)
+unsigned int acoral_sem_pend(acoral_evt_t *evt, unsigned int timeout)
 {
 	acoral_thread_t *cur = acoral_cur_thread;
 
@@ -150,7 +150,7 @@ acoral_u32 acoral_sem_pend(acoral_evt_t *evt, acoral_time timeout)
 
 	/* 计算信号量处理*/
 	acoral_enter_critical();
-	if ((acoral_8)evt->count <= SEM_RES_AVAI)
+	if ((char)evt->count <= SEM_RES_AVAI)
 	{   /* available*/
 		evt->count++;
 		acoral_exit_critical();
@@ -193,7 +193,7 @@ acoral_u32 acoral_sem_pend(acoral_evt_t *evt, acoral_time timeout)
  *  desp: count > SEM_RES_NOAVAI 有等待线程 a-- && resume waiting thread.
  *        count <= SEM_RES_NOAVAI 无等待线程 a--
  *===========================*/
-acoral_u32 acoral_sem_post(acoral_evt_t *evt)
+unsigned int acoral_sem_post(acoral_evt_t *evt)
 {
 	acoral_thread_t     *thread;
 
@@ -210,7 +210,7 @@ acoral_u32 acoral_sem_post(acoral_evt_t *evt)
 	acoral_enter_critical();
 
 	/* 计算信号量的释放*/
-	if ((acoral_8)evt->count <= SEM_RES_NOAVAI)
+	if ((char)evt->count <= SEM_RES_NOAVAI)
 	{ /* no waiting thread*/
 		evt->count--;
 		acoral_exit_critical();
@@ -239,14 +239,14 @@ acoral_u32 acoral_sem_post(acoral_evt_t *evt)
  *   get singal's number now
  *     得到当前信号量数目
  *===================================*/
-acoral_32 acoral_sem_getnum(acoral_evt_t* evt)
+int acoral_sem_getnum(acoral_evt_t* evt)
 {
-	acoral_32 t;
+	int t;
 	if (NULL == evt)
 		return SEM_ERR_NULL;
 
 	acoral_enter_critical();
-	t = 1 - (acoral_32)evt->count;
+	t = 1 - (int)evt->count;
 	acoral_exit_critical();
 	return t;
 }

@@ -16,17 +16,17 @@
 #ifndef HAL_INT_H
 #define HAL_INT_H
 
-#include "type.h"
+
 
 #define HAL_INTR_ENABLE()                  __asm volatile  ( "csrc mstatus,8" )
 #define HAL_INTR_DISABLE()                 __asm volatile  ( "csrs mstatus,8" )
 
-void hal_intr_unmask(acoral_vector vector);
-void hal_intr_mask(acoral_vector vector);
-void hal_intr_ack(acoral_u32 vector);
+void hal_intr_unmask(int vector);
+void hal_intr_mask(int vector);
+void hal_intr_ack(unsigned int vector);
 void hal_intr_init(void);
 void hal_intr_nesting_init_comm();
-acoral_u32 hal_get_intr_nesting_comm();
+unsigned int hal_get_intr_nesting_comm();
 void hal_intr_nesting_dec_comm();
 void hal_intr_nesting_inc_comm();
 void hal_sched_bridge_comm();

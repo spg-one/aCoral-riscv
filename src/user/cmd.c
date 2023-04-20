@@ -3,7 +3,7 @@
 #include "mem.h"
 #include <stdio.h>
 
-void malloc_scan(acoral_32 argc,acoral_char **argv){
+void malloc_scan(int argc,char **argv){
 	acoral_mem_scan();
 }
 
@@ -14,7 +14,7 @@ acoral_shell_cmd_t mem_cmd={
 	NULL
 };
 
-void malloc_scan2(acoral_32 argc,acoral_char **argv){
+void malloc_scan2(int argc,char **argv){
 	acoral_mem_scan2();
 }
 
@@ -26,7 +26,7 @@ acoral_shell_cmd_t mem2_cmd={
 };
 
 extern acoral_shell_cmd_t *head_cmd;
-void help(acoral_32 argc,acoral_char **argv){
+void help(int argc,char **argv){
 	acoral_shell_cmd_t *curr;
 	curr =head_cmd;
 	while(curr != NULL) {
@@ -42,7 +42,7 @@ acoral_shell_cmd_t help_cmd={
 	NULL
 };
 
-void spg(acoral_32 argc,acoral_char **argv){
+void spg(int argc,char **argv){
 	printf("SPGGOGOGO!!!");
 }
 

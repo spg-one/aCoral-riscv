@@ -13,7 +13,7 @@
  *  </table>
  */
 
-#include "type.h"
+
 #include "hal.h"
 #include "queue.h"
 #include "lsched.h"
@@ -40,9 +40,9 @@ acoral_pool_ctrl_t acoral_thread_pool_ctrl;
  * @param stack 线程栈指针
  * @param sched_policy 线程调度策略
  * @param data 线程策略数据
- * @return acoral_id 返回线程id
+ * @return int 返回线程id
  */
-acoral_id acoral_create_thread(void (*route)(void *args),acoral_u32 stack_size,void *args,acoral_char *name,void *stack,acoral_u32 sched_policy,void *data){
+int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,void *stack,unsigned int sched_policy,void *data){
 	acoral_thread_t *thread;
         /*分配tcb数据块*/
 	thread=acoral_alloc_thread();
@@ -55,7 +55,7 @@ acoral_id acoral_create_thread(void (*route)(void *args),acoral_u32 stack_size,v
 	stack_size=stack_size&(~3);
 	thread->stack_size=stack_size;
 	if(stack!=NULL)
-		thread->stack_buttom=(acoral_u32 *)stack;
+		thread->stack_buttom=(unsigned int *)stack;
 	else
 		thread->stack_buttom=NULL;
 	thread->policy=sched_policy;
@@ -126,7 +126,7 @@ void acoral_suspend_self(){
  *      thread_idID
  *================================*/
 
-void acoral_suspend_thread_by_id(acoral_u32 thread_id){
+void acoral_suspend_thread_by_id(unsigned int thread_id){
 	acoral_thread_t *thread=(acoral_thread_t *)acoral_get_res_by_id(thread_id);
 	acoral_suspend_thread(thread);
 }
@@ -137,7 +137,7 @@ void acoral_suspend_thread_by_id(acoral_u32 thread_id){
  *   thread_idID
  *================================*/
 
-void acoral_resume_thread_by_id(acoral_u32 thread_id){
+void acoral_resume_thread_by_id(unsigned int thread_id){
 	acoral_thread_t *thread=(acoral_thread_t *)acoral_get_res_by_id(thread_id);
 	acoral_resume_thread(thread);
 }
@@ -166,8 +166,8 @@ void acoral_resume_thread(acoral_thread_t *thread){
  * timems	
  *      
  *================================*/
-static void acoral_delay_thread(acoral_thread_t* thread,acoral_time time){
-	acoral_u32 real_ticks;
+static void acoral_delay_thread(acoral_thread_t* thread,unsigned int time){
+	unsigned int real_ticks;
 	if(!acoral_list_empty(&thread->waiting)){
 		return;	
 	}
@@ -185,7 +185,7 @@ static void acoral_delay_thread(acoral_thread_t* thread,acoral_time time){
  *         	
  * timems	
  *================================*/
-void acoral_delay_self(acoral_time time){
+void acoral_delay_self(unsigned int time){
 	acoral_delay_thread(acoral_cur_thread,time);
 }
 
@@ -223,7 +223,7 @@ void acoral_kill_thread(acoral_thread_t *thread){
  *         	
  * thread_idID 	
  *================================*/
-void acoral_kill_thread_by_id(acoral_id id){
+void acoral_kill_thread_by_id(int id){
 	acoral_thread_t *thread;
 	thread=(acoral_thread_t *)acoral_get_res_by_id(id);
 	acoral_kill_thread(thread);
@@ -241,7 +241,7 @@ void acoral_thread_exit(){
  *    change thread's prio
  *    
  *===========================*/
-void acoral_thread_change_prio(acoral_thread_t* thread, acoral_u32 prio){
+void acoral_thread_change_prio(acoral_thread_t* thread, unsigned int prio){
 	acoral_enter_critical();
 	if(thread->state&ACORAL_THREAD_STATE_READY){
 		acoral_rdyqueue_del(thread);
@@ -256,7 +256,7 @@ void acoral_thread_change_prio(acoral_thread_t* thread, acoral_u32 prio){
  *    change current thread's prio
  *    
  *===========================*/
-void acoral_change_prio_self(acoral_u32 prio){
+void acoral_change_prio_self(unsigned int prio){
 	acoral_thread_change_prio(acoral_cur_thread, prio);
 }
 
@@ -264,7 +264,7 @@ void acoral_change_prio_self(acoral_u32 prio){
  *    change thread's prio
  *    ID
  *===========================*/
-void acoral_thread_change_prio_by_id(acoral_u32 thread_id, acoral_u32 prio){
+void acoral_thread_change_prio_by_id(unsigned int thread_id, unsigned int prio){
 	acoral_thread_t *thread=(acoral_thread_t *)acoral_get_res_by_id(thread_id);
 	acoral_thread_change_prio(thread, prio);
 }
@@ -304,7 +304,7 @@ void acoral_thread_move2_tail(acoral_thread_t *thread){
 	acoral_sched();
 }
 
-void acoral_thread_move2_tail_by_id(acoral_id thread_id){
+void acoral_thread_move2_tail_by_id(int thread_id){
 	acoral_thread_t *thread=(acoral_thread_t *)acoral_get_res_by_id(thread_id);
 	acoral_thread_move2_tail(thread);
 }
@@ -327,17 +327,17 @@ acoral_thread_t *acoral_alloc_thread(){
  *       args       
  *       name       
  *================================*/
-acoral_err acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args),void (*exit)(void),void *args){
-	acoral_u32 stack_size=thread->stack_size;
+unsigned int acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args),void (*exit)(void),void *args){
+	unsigned int stack_size=thread->stack_size;
 	if(thread->stack_buttom==NULL){
 		if(stack_size<CFG_MIN_STACK_SIZE)
 			stack_size=CFG_MIN_STACK_SIZE;
-		thread->stack_buttom=(acoral_u32 *)acoral_malloc(stack_size);
+		thread->stack_buttom=(unsigned int *)acoral_malloc(stack_size);
 		if(thread->stack_buttom==NULL)
 			return ACORAL_ERR_THREAD_NO_STACK;
 		thread->stack_size=stack_size;
 	}
-	thread->stack=(acoral_u32 *)((acoral_8 *)thread->stack_buttom+stack_size-4);
+	thread->stack=(unsigned int *)((char *)thread->stack_buttom+stack_size-4);
 	thread->stack = HAL_STACK_INIT(thread->stack,route,exit,args);
 	
 	thread->data=NULL;

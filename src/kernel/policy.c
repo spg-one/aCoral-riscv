@@ -1,4 +1,4 @@
-#include "type.h"
+
 #include "hal.h"
 #include "queue.h"
 #include "thread.h"
@@ -10,7 +10,7 @@
 
 acoral_queue_t policy_list;
 
-acoral_sched_policy_t *acoral_get_policy_ctrl(acoral_u8 type){
+acoral_sched_policy_t *acoral_get_policy_ctrl(unsigned char type){
 	acoral_list_t   *tmp,*head;
 	acoral_sched_policy_t  *policy_ctrl;
 	head=&policy_list.head;
@@ -23,7 +23,7 @@ acoral_sched_policy_t *acoral_get_policy_ctrl(acoral_u8 type){
 	return NULL;
 }
 
-acoral_id acoral_policy_thread_init(acoral_u32 policy,acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
+int acoral_policy_thread_init(unsigned int policy,acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
 	acoral_sched_policy_t   *policy_ctrl;
 	policy_ctrl=acoral_get_policy_ctrl(policy);	
 	if(policy_ctrl==NULL||policy_ctrl->policy_thread_init==NULL){

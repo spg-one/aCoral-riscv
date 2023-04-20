@@ -4,7 +4,7 @@
 #include "shell.h"
 #include <stdio.h>
 
-void display_thread(acoral_32 argc,acoral_char **argv){	
+void display_thread(int argc,char **argv){	
 	acoral_list_t *head,*tmp;
 	acoral_thread_t * thread;
 	head=&acoral_threads_queue.head;

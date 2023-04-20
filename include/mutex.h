@@ -16,7 +16,7 @@
 
 #ifndef _ACORAL_MUTEX_H
 #define _ACORAL_MUTEX_H
-#include "type.h"
+
 #include "event.h"
 
 #define MUTEX_AVAI 0x00FF
@@ -37,11 +37,11 @@ enum acoralMutexRetVal{
     MUTEX_ERR_RDY
 };
 
-acoral_u32 acoral_mutex_init(acoral_evt_t *, acoral_u8);
-acoral_evt_t *acoral_mutex_create(acoral_u8, acoral_u32 *);
-acoral_u32 acoral_mutex_del(acoral_evt_t *, acoral_u32);
-acoral_u32 acoral_mutex_pend(acoral_evt_t *, acoral_u32);
-acoral_u32 acoral_mutex_post(acoral_evt_t *);
-acoral_u32 acoral_mutex_trypend(acoral_evt_t *);
+unsigned int acoral_mutex_init(acoral_evt_t *, unsigned char);
+acoral_evt_t *acoral_mutex_create(unsigned char, unsigned int *);
+unsigned int acoral_mutex_del(acoral_evt_t *, unsigned int);
+unsigned int acoral_mutex_pend(acoral_evt_t *, unsigned int);
+unsigned int acoral_mutex_post(acoral_evt_t *);
+unsigned int acoral_mutex_trypend(acoral_evt_t *);
 
 #endif

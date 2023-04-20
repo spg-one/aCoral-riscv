@@ -12,7 +12,7 @@
  *   <tr><td> 1.0 <td>王彬浩 <td> 2022-07-08 <td>Standardized 
  *  </table>
  */
-#include "type.h"
+
 #include "queue.h"
 #include "thread.h"
 #include "lsched.h"
@@ -33,10 +33,10 @@ acoral_sched_policy_t comm_policy;
  * @param args 传进线程的参数
  * @param name 创建线程的名字
  * @param prio 创建线程的优先级
- * @return acoral_id 
+ * @return int 
  */
 
-acoral_id create_comm_thread(void (*route)(void *args),acoral_u32 stack_size,void *args,acoral_char *name,acoral_u8 prio){
+int create_comm_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,unsigned char prio){
 	acoral_comm_policy_data_t policy_ctrl;
 	acoral_thread_t *thread;
         /*分配tcb数据块*/
@@ -64,10 +64,10 @@ acoral_id create_comm_thread(void (*route)(void *args),acoral_u32 stack_size,voi
  * @param route 
  * @param args 
  * @param data 
- * @return acoral_id 
+ * @return int 
  */
-acoral_id comm_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
-	acoral_u32 prio;
+int comm_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
+	unsigned int prio;
 	acoral_comm_policy_data_t *policy_data;
 	policy_data=(acoral_comm_policy_data_t *)data;
 	prio=policy_data->prio;

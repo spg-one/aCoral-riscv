@@ -1,4 +1,4 @@
-#include "type.h"
+
 #include "queue.h"
 #include "thread.h"
 #include "hal.h"
@@ -10,8 +10,8 @@
 #include <stdio.h>
 
 acoral_queue_t period_delay_queue;
-acoral_id period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
-	acoral_u32 prio;
+int period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
+	unsigned int prio;
 	acoral_period_policy_data_t *policy_data;
 	period_private_data_t *private_data;
 	if(thread->policy==ACORAL_SCHED_POLICY_PERIOD){
@@ -65,8 +65,8 @@ void period_policy_thread_release(acoral_thread_t *thread){
 void acoral_periodqueue_add(acoral_thread_t *new){
 	acoral_list_t   *tmp,*head;
 	acoral_thread_t *thread;
-	acoral_32  delay2;
-	acoral_32  delay= new->delay;
+	int  delay2;
+	int  delay= new->delay;
 	head=&period_delay_queue.head;
 	new->state|=ACORAL_THREAD_STATE_DELAY;
 	for (tmp=head->next;delay2=delay,tmp!=head; tmp=tmp->next){
@@ -84,7 +84,7 @@ void acoral_periodqueue_add(acoral_thread_t *new){
 	}
 }
 
-void period_thread_delay(acoral_thread_t* thread,acoral_time time){
+void period_thread_delay(acoral_thread_t* thread,unsigned int time){
 	thread->delay=TIME_TO_TICKS(time);
 	acoral_periodqueue_add(thread);
 }
@@ -108,7 +108,7 @@ void period_delay_deal(){
 		acoral_list_del(&thread->waiting);
 		tmp=tmp1;
 		if(thread->state&ACORAL_THREAD_STATE_SUSPEND){
-			thread->stack=(acoral_u32 *)((acoral_8 *)thread->stack_buttom+thread->stack_size-4);
+			thread->stack=(unsigned int *)((char *)thread->stack_buttom+thread->stack_size-4);
 			thread->stack = HAL_STACK_INIT(thread->stack,private_data->route,period_thread_exit,private_data->args);
 			acoral_rdy_thread(thread);
 		}

@@ -16,7 +16,7 @@
 #ifndef ACORAL_TIMER_H
 #define ACORAL_TIMER_H
 #include "autocfg.h"
-#include "type.h"
+
 #include "core.h"
 #include "queue.h"
 #include "thread.h"
@@ -33,9 +33,9 @@ void acoral_time_sys_init();
 
 void acoral_time_init(void);
 void acoral_ticks_init(void);
-void acoral_ticks_entry(acoral_vector vector);
-acoral_time acoral_get_ticks(void);
-void acoral_set_ticks(acoral_time time);
+void acoral_ticks_entry(int vector);
+unsigned int acoral_get_ticks(void);
+void acoral_set_ticks(unsigned int time);
 void time_delay_deal(void);
 void acoral_delayqueue_add(acoral_queue_t*, acoral_thread_t*);
 acoral_evt_t *acoral_alloc_evt(void);

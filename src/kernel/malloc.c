@@ -1,4 +1,4 @@
-#include "type.h" //TODO合并
+
 #include "mutex.h"
 #include "mem.h"
 #include "thread.h"
@@ -22,22 +22,22 @@
 #define BLOCK_CLEAR(ptr) (*ptr=0)
 struct mem2_ctrl_t{
 	acoral_evt_t mutex;	
-	acoral_8 *top_p;
-	acoral_8 *down_p;
-	acoral_u32 *freep_p;
-	acoral_u8 mem_state;
+	char *top_p;
+	char *down_p;
+	unsigned int *freep_p;
+	unsigned char mem_state;
 }mem_ctrl;
 
-static void *r_malloc(acoral_32 size){
-	acoral_u32 * tp;
-	acoral_8 * ctp;
-	acoral_u32 b_size;
+static void *r_malloc(int size){
+	unsigned int * tp;
+	char * ctp;
+	unsigned int b_size;
 	size=size+4;
 	while(acoral_mutex_pend(&mem_ctrl.mutex, 0)!=MUTEX_SUCCED)
 		acoral_suspend_self();
 
 	tp=mem_ctrl.freep_p;
-	ctp=(acoral_8 *)tp;
+	ctp=(char *)tp;
 	while(ctp<mem_ctrl.top_p){
              b_size=BLOCK_SIZE(*tp);
 	     if(b_size==0){
@@ -47,13 +47,13 @@ static void *r_malloc(acoral_32 size){
 	     }
 	     if(BLOCK_USED(*tp)||b_size<size){
         	ctp=ctp+b_size;
-		tp=(acoral_u32 *)ctp;
+		tp=(unsigned int *)ctp;
 	     }
 	     else
 	     {
 		BLOCK_SET_USED(tp,size);
 		ctp=ctp+size;
-		tp=(acoral_u32 *)ctp;
+		tp=(unsigned int *)ctp;
 		if(b_size-size>0)
 			BLOCK_SET_FREE(tp,b_size-size);
 		mem_ctrl.freep_p=tp;
@@ -63,7 +63,7 @@ static void *r_malloc(acoral_32 size){
 	     }
 	}
     	ctp=mem_ctrl.down_p;
-	tp=(acoral_u32 *)ctp;
+	tp=(unsigned int *)ctp;
 	while(tp<mem_ctrl.freep_p){
 	     b_size=BLOCK_SIZE(*tp);
 	     if(b_size==0){
@@ -73,13 +73,13 @@ static void *r_malloc(acoral_32 size){
 	     }
 	     if(BLOCK_USED(*tp)||b_size<size){
         	ctp=ctp+b_size;
-		tp=(acoral_u32 *)ctp;
+		tp=(unsigned int *)ctp;
 	     }
 	     else
 	     {
 		BLOCK_SET_USED(tp,size);
 		ctp=ctp+size;
-		tp=(acoral_u32 *)ctp;
+		tp=(unsigned int *)ctp;
 		if(b_size-size>0)
 			BLOCK_SET_FREE(tp,b_size-size);
 		mem_ctrl.freep_p=tp;
@@ -92,7 +92,7 @@ static void *r_malloc(acoral_32 size){
 	return NULL;
 }
 
-void * v_malloc(acoral_32 size){
+void * v_malloc(int size){
 	if(mem_ctrl.mem_state==0)
 		return NULL;
 	size=(size+3)&~3;
@@ -100,16 +100,16 @@ void * v_malloc(acoral_32 size){
 }
 
 void v_free(void * p){
-	acoral_u32 * tp,*prev_tp;
-	acoral_8 * ctp;
-	acoral_u32 b_size,size=0;
+	unsigned int * tp,*prev_tp;
+	char * ctp;
+	unsigned int b_size,size=0;
 	if(mem_ctrl.mem_state==0)
 		return;
-	p=(acoral_8 *)p-4;
-	tp=(acoral_u32 *)p;
+	p=(char *)p-4;
+	tp=(unsigned int *)p;
 	while(acoral_mutex_pend(&mem_ctrl.mutex, 0)!=0) //周期性任务
 		acoral_suspend_self();
-	if(p==NULL||(acoral_8 *)p<mem_ctrl.down_p||(acoral_8 *)p>=mem_ctrl.top_p||!BLOCK_CHECK(*tp)){
+	if(p==NULL||(char *)p<mem_ctrl.down_p||(char *)p>=mem_ctrl.top_p||!BLOCK_CHECK(*tp)){
 		printf("Invalide Free address:0x%x\n",(unsigned int)tp);
 		return;
 	}
@@ -118,11 +118,11 @@ void v_free(void * p){
 		return;
 	}
 	prev_tp=tp;
-	ctp=(acoral_8 *)tp;
+	ctp=(char *)tp;
     b_size=BLOCK_SIZE(*tp);
 
    	ctp=ctp+b_size;
-	tp=(acoral_u32 *)ctp;
+	tp=(unsigned int *)ctp;
 	if(BLOCK_FREE(*tp)){
 		size=BLOCK_SIZE(*tp);
 		if(size==0){
@@ -141,8 +141,8 @@ void v_free(void * p){
 		return;
 	}
 	ctp=mem_ctrl.down_p;
-	tp=(acoral_u32 *)ctp;
-	while(ctp<(acoral_8 *)p){
+	tp=(unsigned int *)ctp;
+	while(ctp<(char *)p){
 	     size=BLOCK_SIZE(*tp);
 	     if(size==0){
 			printf("err address is 0x%x,size should not be 0",(unsigned int)tp);
@@ -151,10 +151,10 @@ void v_free(void * p){
              }
 	     ctp=ctp+size;
 	     prev_tp=tp;
-	     tp=(acoral_u32 *)ctp;
+	     tp=(unsigned int *)ctp;
 	}
 	if(BLOCK_FREE(*prev_tp)){
-		tp=(acoral_u32*)p;
+		tp=(unsigned int*)p;
 		BLOCK_CLEAR(tp);
 		BLOCK_SET_FREE(prev_tp,b_size+size);
 		mem_ctrl.freep_p=prev_tp;
@@ -168,9 +168,9 @@ void v_free(void * p){
  * 
  */
 void v_mem_init(){
-	acoral_size size;
+	unsigned int size;
 	size=acoral_malloc_size(MEM_SIZE);
-	mem_ctrl.down_p=(acoral_8 *)acoral_malloc(size);
+	mem_ctrl.down_p=(char *)acoral_malloc(size);
 	if(mem_ctrl.down_p==NULL){
 		mem_ctrl.mem_state=0;
 		return;
@@ -180,21 +180,21 @@ void v_mem_init(){
 	}
 	acoral_mutex_init(&mem_ctrl.mutex,0);
 	mem_ctrl.top_p=mem_ctrl.down_p+size;
-	mem_ctrl.freep_p=(acoral_u32 *)mem_ctrl.down_p;
+	mem_ctrl.freep_p=(unsigned int *)mem_ctrl.down_p;
 	BLOCK_SET_FREE(mem_ctrl.freep_p,size);
 }
 
 void v_mem_scan(void){
-        acoral_8 * ctp;
-	acoral_u32 * tp;
-	acoral_u32 size;
+        char * ctp;
+	unsigned int * tp;
+	unsigned int size;
 	if(mem_ctrl.mem_state==0){
 		printf("Mem Init Err ,so no mem space to malloc\r\n");
 		return;
 	}
 	ctp=mem_ctrl.down_p;
 	do{
-		tp=(acoral_u32 *)ctp;
+		tp=(unsigned int *)ctp;
 		size=BLOCK_SIZE(*tp);
 		if(size==0){
 			printf("Err address is 0x%x,size should not be 0\r\n",(unsigned int)tp);

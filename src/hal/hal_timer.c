@@ -12,7 +12,7 @@
  *   <tr><td> 1.0 <td>王彬浩 <td> 2022-07-17 <td>Standardized 
  *  </table>
  */
-#include "type.h"
+
 #include "core.h"
 #include "hal_timer.h"
 #include "clint.h"

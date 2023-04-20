@@ -15,6 +15,7 @@
 #include "lsched.h"
 #include "clint.h"
 #include "list.h"
+#include <stdbool.h>
 
 acoral_queue_t time_delay_queue;
 /*----------------*/
@@ -22,7 +23,7 @@ acoral_queue_t time_delay_queue;
 /*  pegasus   0719*/
 /*----------------*/
 acoral_queue_t timeout_queue;
-static acoral_u32 ticks;
+static unsigned int ticks;
 void acoral_time_sys_init(){
   	acoral_init_list(&time_delay_queue.head);
 
@@ -34,11 +35,11 @@ void acoral_time_sys_init(){
 }
 
 
-acoral_time acoral_get_ticks(){
+unsigned int acoral_get_ticks(){
 	return ticks;
 }
 
-void acoral_set_ticks(acoral_time time){
+void acoral_set_ticks(unsigned int time){
   	ticks=time;
 }
 
@@ -50,7 +51,7 @@ void acoral_ticks_init(){
 	return;
 }
 
-void acoral_ticks_entry(acoral_vector vector){
+void acoral_ticks_entry(int vector){
 
         ticks++;
 	if(acoral_start_sched==true){
@@ -71,8 +72,8 @@ void acoral_ticks_entry(acoral_vector vector){
 void acoral_delayqueue_add(acoral_queue_t *queue, acoral_thread_t *new){
 	acoral_list_t   *tmp, *head;
 	acoral_thread_t *thread;
-	acoral_32  delay2;
-	acoral_32  delay= new->delay;
+	int  delay2;
+	int  delay= new->delay;
 	head=&queue->head;
 	acoral_enter_critical();
 	/*这里采用关ticks中断，不用关中断，是为了减少最大关中断时间，下面是个链表，时间不确定。*/
@@ -130,8 +131,8 @@ void timeout_queue_add(acoral_thread_t *new)
 {
 	acoral_list_t   *tmp, *tmp1,*head;
 	acoral_thread_t *thread;
-	acoral_32  delay2;
-	acoral_32  delay= new->delay;
+	int  delay2;
+	int  delay= new->delay;
 	head=&timeout_queue.head;
 	acoral_enter_critical();
 #ifndef CFG_TICKS_PRIVATE

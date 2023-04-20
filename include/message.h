@@ -21,7 +21,7 @@
 
 #ifndef ACORAL_MESSAGE_H
 #define ACORAL_MESSAGE_H
-#include "type.h"
+
 #include "queue.h"
 #include "list.h"
 #include "mem.h"
@@ -39,10 +39,10 @@
 typedef struct
 {
 	acoral_res_t res; 			///<消息容器也是资源
-	acoral_8 *name;				///<消息容器名字
+	char *name;				///<消息容器名字
 	acoral_list_t msgctr_list; 	///<全局消息列表
-	acoral_u32 count; 			///<消息数量
-	acoral_u32 wait_thread_num; ///<等待线程数
+	unsigned int count; 			///<消息数量
+	unsigned int wait_thread_num; ///<等待线程数
 	acoral_list_t waiting; 		///<等待线程指针链
 	acoral_list_t msglist; 		///<消息链指针，用于挂载消息
 } acoral_msgctr_t;
@@ -55,21 +55,21 @@ typedef struct
 {
 	acoral_res_t res; 		///<消息也是一种资源
 	acoral_list_t msglist; 	///<消息链指针，用于挂载到消息容器
-	acoral_u32 id; 			///<消息标识	
-	acoral_u32 n; 			///<消息被接收次数，每被接收一次减一,直到0为止	
-	acoral_u32 ttl; 		///<消息最大生命周期  ticks计数
+	unsigned int id; 			///<消息标识	
+	unsigned int n; 			///<消息被接收次数，每被接收一次减一,直到0为止	
+	unsigned int ttl; 		///<消息最大生命周期  ticks计数
 	void *data; 			///<消息指针
 } acoral_msg_t;
 
 void acoral_msg_sys_init(void);
 acoral_msgctr_t *acoral_alloc_msgctr(void);
 acoral_msg_t *acoral_alloc_msg(void);
-acoral_msgctr_t *acoral_msgctr_create(acoral_u32 *);
-acoral_msg_t *acoral_msg_create(acoral_u32, acoral_u32 *, acoral_u32, acoral_u32, void *);
-acoral_u32 acoral_msg_send(acoral_msgctr_t *, acoral_msg_t *);
-void *acoral_msg_recv(acoral_msgctr_t *, acoral_u32, acoral_u32, acoral_u32 *);
-acoral_u32 acoral_msgctr_del(acoral_msgctr_t *, acoral_u32);
-acoral_u32 acoral_msg_del(acoral_msg_t *);
+acoral_msgctr_t *acoral_msgctr_create(unsigned int *);
+acoral_msg_t *acoral_msg_create(unsigned int, unsigned int *, unsigned int, unsigned int, void *);
+unsigned int acoral_msg_send(acoral_msgctr_t *, acoral_msg_t *);
+void *acoral_msg_recv(acoral_msgctr_t *, unsigned int, unsigned int, unsigned int *);
+unsigned int acoral_msgctr_del(acoral_msgctr_t *, unsigned int);
+unsigned int acoral_msg_del(acoral_msg_t *);
 void acoral_print_all_msg(acoral_msgctr_t *);
 void wake_up_thread(acoral_list_t *);
 

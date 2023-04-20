@@ -12,7 +12,7 @@
  *   <tr><td> 1.0 <td>王彬浩 <td> 2022-07-24 <td>Standardized 
  *  </table>
  */
-#include "type.h"
+
 #include "hal.h"
 #include "lsched.h"
 #include "int.h"

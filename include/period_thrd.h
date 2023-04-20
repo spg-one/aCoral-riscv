@@ -15,7 +15,7 @@
  */
 #ifndef PERIOD_THRD_H
 #define PERIOD_THRD_H
-#include "type.h"
+
 #include "thread.h"
 
 /**
@@ -23,9 +23,9 @@
  * 
  */
 typedef struct{
-	acoral_u8 prio; 	///<线程优先级
-	acoral_8 prio_type; ///<线程优先级类型，包括绝对、相对等
-	acoral_time time; 	///<线程周期，单位为毫秒
+	unsigned char prio; 	///<线程优先级
+	unsigned char prio_type; ///<线程优先级类型，包括绝对(硬实时任务)、相对（非硬实时任务）等
+	unsigned int time; 	///<线程周期，单位为毫秒
 }acoral_period_policy_data_t;
 
 /**
@@ -33,14 +33,14 @@ typedef struct{
  * 
  */
 typedef struct{
-	acoral_time time; 			///<线程周期，单位为毫秒
+	unsigned int time; 			///<线程周期，单位为毫秒
 	void (*route)(void *args); 	///<线程函数
 	void *args; 				///<线程函数的参数
 }period_private_data_t;
 
 void period_thread_exit(void);
-void period_thread_delay(acoral_thread_t* thread,acoral_time time);
+void period_thread_delay(acoral_thread_t* thread,unsigned int time);
 void period_delay_deal(void);
-acoral_id period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data);
+int period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data);
 void period_policy_init(void);
 #endif

@@ -1,4 +1,4 @@
-#include "type.h"
+
 #include "event.h"
 #include "hal.h"
 #include "thread.h"
@@ -16,7 +16,7 @@ acoral_thread_t *acoral_evt_high_thread(acoral_evt_t *evt);
  *  The initialize of the mutex
  *       信号量初始化函数
  *==============================*/
-acoral_u32 acoral_mutex_init(acoral_evt_t *evt, acoral_u8 prio)
+unsigned int acoral_mutex_init(acoral_evt_t *evt, unsigned char prio)
 {
 	if ((acoral_evt_t*)0 == evt)
 	{
@@ -33,7 +33,7 @@ acoral_u32 acoral_mutex_init(acoral_evt_t *evt, acoral_u8 prio)
  *  The creation of the mutex
  *       信号量创建函数
  *==============================*/
-acoral_evt_t *acoral_mutex_create(acoral_u8 prio, acoral_u32 *err)
+acoral_evt_t *acoral_mutex_create(unsigned char prio, unsigned int *err)
 {
 	acoral_evt_t *evt;
 
@@ -55,7 +55,7 @@ acoral_evt_t *acoral_mutex_create(acoral_u8 prio, acoral_u32 *err)
  *  The deletion of the mutex
  *      信号号删除函数
  *============================= */
-acoral_u32 acoral_mutex_del(acoral_evt_t *evt, acoral_u32 opt)
+unsigned int acoral_mutex_del(acoral_evt_t *evt, unsigned int opt)
 {
 	/* 参数检测 */
 	if (NULL == evt)
@@ -89,7 +89,7 @@ acoral_u32 acoral_mutex_del(acoral_evt_t *evt, acoral_u32 opt)
  *      信号号申请操作
  *  	  非阻塞式
  *=============================*/
-acoral_u32 acoral_mutex_trypend(acoral_evt_t *evt)
+unsigned int acoral_mutex_trypend(acoral_evt_t *evt)
 {
 	acoral_thread_t *cur;
 
@@ -105,7 +105,7 @@ acoral_u32 acoral_mutex_trypend(acoral_evt_t *evt)
 		return MUTEX_ERR_NULL;
 	}
 	
-	if ((acoral_u8)(evt->count & MUTEX_L_MASK) == MUTEX_AVAI)
+	if ((unsigned char)(evt->count & MUTEX_L_MASK) == MUTEX_AVAI)
 	{
 		/* 申请成功*/
 		evt->count &= MUTEX_U_MASK;
@@ -125,9 +125,9 @@ acoral_u32 acoral_mutex_trypend(acoral_evt_t *evt)
  *      信号号申请操作
  *  优先级继承的优先级反转解决
  *=============================*/
-acoral_u32 acoral_mutex_pend(acoral_evt_t *evt, acoral_time timeout)
+unsigned int acoral_mutex_pend(acoral_evt_t *evt, unsigned int timeout)
 {
-	acoral_u8        highPrio;
+	unsigned char        highPrio;
 	acoral_thread_t *thread;
 	acoral_thread_t *cur;
 
@@ -143,7 +143,7 @@ acoral_u32 acoral_mutex_pend(acoral_evt_t *evt, acoral_time timeout)
 		return MUTEX_ERR_NULL;
 	}
 	
-	if ((acoral_u8)(evt->count & MUTEX_L_MASK) == MUTEX_AVAI)
+	if ((unsigned char)(evt->count & MUTEX_L_MASK) == MUTEX_AVAI)
 	{
 		/* 申请成功*/
 		evt->count &= MUTEX_U_MASK;
@@ -154,7 +154,7 @@ acoral_u32 acoral_mutex_pend(acoral_evt_t *evt, acoral_time timeout)
 	}
 	
 	/* 互斥量已被占有*/
-	highPrio = (acoral_u8)(evt->count >> 8);
+	highPrio = (unsigned char)(evt->count >> 8);
 	thread = (acoral_thread_t*)evt->data;
 
 	/*有可能优先级反转，继承最高优先级*/
@@ -206,7 +206,7 @@ acoral_u32 acoral_mutex_pend(acoral_evt_t *evt, acoral_time timeout)
  *      信号号申请操作
  *  优先级天花板的优先级反转解决
  *=============================*/
-acoral_u32 acoral_mutex_pend2(acoral_evt_t *evt, acoral_time timeout)
+unsigned int acoral_mutex_pend2(acoral_evt_t *evt, unsigned int timeout)
 {
 	acoral_thread_t *cur;
 
@@ -222,7 +222,7 @@ acoral_u32 acoral_mutex_pend2(acoral_evt_t *evt, acoral_time timeout)
 		return MUTEX_ERR_NULL;
 	}
 	
-	if ((acoral_u8)(evt->count & MUTEX_L_MASK) == MUTEX_AVAI)
+	if ((unsigned char)(evt->count & MUTEX_L_MASK) == MUTEX_AVAI)
 	{
 		/* 申请成功*/
 		evt->count &= MUTEX_U_MASK;
@@ -276,10 +276,10 @@ acoral_u32 acoral_mutex_pend2(acoral_evt_t *evt, acoral_time timeout)
  *  post a mutex to thread
  *     信号量的释放
  *===========================*/
-acoral_u32 acoral_mutex_post(acoral_evt_t *evt)
+unsigned int acoral_mutex_post(acoral_evt_t *evt)
 {
-	acoral_u8             ownerPrio;
-	acoral_u8             highPrio;
+	unsigned char             ownerPrio;
+	unsigned char             highPrio;
 	acoral_thread_t      *thread;
 	acoral_thread_t      *cur;
 
@@ -292,8 +292,8 @@ acoral_u32 acoral_mutex_post(acoral_evt_t *evt)
 		return MUTEX_ERR_NULL;   /*error*/
 	}
 	
-	highPrio  = (acoral_u8)(evt->count >> 8);
-	ownerPrio = (acoral_u8)(evt->count & MUTEX_L_MASK);
+	highPrio  = (unsigned char)(evt->count >> 8);
+	ownerPrio = (unsigned char)(evt->count & MUTEX_L_MASK);
 	cur=acoral_cur_thread;
 	if (highPrio!=0&&cur->prio != highPrio && cur->prio != ownerPrio )
 	{

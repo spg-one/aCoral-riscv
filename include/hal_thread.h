@@ -21,79 +21,79 @@
  * @brief aCoral线程上下文context在硬件层面的描述
  */
 typedef struct {
-  	acoral_u64 epc;        /* epc - epc    - program counter                     */
-    acoral_u64 ra;         /* x1  - ra     - return address for jumps            */
-    acoral_u64 mstatus;    /*              - machine status register             */
-    acoral_u64 gp;         /* x3  - gp     - global pointer                      */
-    acoral_u64 tp;         /* x4  - tp     - thread pointer                      */
-    acoral_u64 t0;         /* x5  - t0     - temporary register 0                */
-    acoral_u64 t1;         /* x6  - t1     - temporary register 1                */
-    acoral_u64 t2;         /* x7  - t2     - temporary register 2                */
-    acoral_u64 s0_fp;      /* x8  - s0/fp  - saved register 0 or frame pointer   */
-    acoral_u64 s1;         /* x9  - s1     - saved register 1                    */
-    acoral_u64 a0;         /* x10 - a0     - return value or function argument 0 */
-    acoral_u64 a1;         /* x11 - a1     - return value or function argument 1 */
-    acoral_u64 a2;         /* x12 - a2     - function argument 2                 */
-    acoral_u64 a3;         /* x13 - a3     - function argument 3                 */
-    acoral_u64 a4;         /* x14 - a4     - function argument 4                 */
-    acoral_u64 a5;         /* x15 - a5     - function argument 5                 */
-    acoral_u64 a6;         /* x16 - a6     - function argument 6                 */
-    acoral_u64 a7;         /* x17 - s7     - function argument 7                 */
-    acoral_u64 s2;         /* x18 - s2     - saved register 2                    */
-    acoral_u64 s3;         /* x19 - s3     - saved register 3                    */
-    acoral_u64 s4;         /* x20 - s4     - saved register 4                    */
-    acoral_u64 s5;         /* x21 - s5     - saved register 5                    */
-    acoral_u64 s6;         /* x22 - s6     - saved register 6                    */
-    acoral_u64 s7;         /* x23 - s7     - saved register 7                    */
-    acoral_u64 s8;         /* x24 - s8     - saved register 8                    */
-    acoral_u64 s9;         /* x25 - s9     - saved register 9                    */
-    acoral_u64 s10;        /* x26 - s10    - saved register 10                   */
-    acoral_u64 s11;        /* x27 - s11    - saved register 11                   */
-    acoral_u64 t3;         /* x28 - t3     - temporary register 3                */
-    acoral_u64 t4;         /* x29 - t4     - temporary register 4                */
-    acoral_u64 t5;         /* x30 - t5     - temporary register 5                */
-    acoral_u64 t6;         /* x31 - t6     - temporary register 6                */
+  	unsigned long epc;        /* epc - epc    - program counter                     */
+    unsigned long ra;         /* x1  - ra     - return address for jumps            */
+    unsigned long mstatus;    /*              - machine status register             */
+    unsigned long gp;         /* x3  - gp     - global pointer                      */
+    unsigned long tp;         /* x4  - tp     - thread pointer                      */
+    unsigned long t0;         /* x5  - t0     - temporary register 0                */
+    unsigned long t1;         /* x6  - t1     - temporary register 1                */
+    unsigned long t2;         /* x7  - t2     - temporary register 2                */
+    unsigned long s0_fp;      /* x8  - s0/fp  - saved register 0 or frame pointer   */
+    unsigned long s1;         /* x9  - s1     - saved register 1                    */
+    unsigned long a0;         /* x10 - a0     - return value or function argument 0 */
+    unsigned long a1;         /* x11 - a1     - return value or function argument 1 */
+    unsigned long a2;         /* x12 - a2     - function argument 2                 */
+    unsigned long a3;         /* x13 - a3     - function argument 3                 */
+    unsigned long a4;         /* x14 - a4     - function argument 4                 */
+    unsigned long a5;         /* x15 - a5     - function argument 5                 */
+    unsigned long a6;         /* x16 - a6     - function argument 6                 */
+    unsigned long a7;         /* x17 - s7     - function argument 7                 */
+    unsigned long s2;         /* x18 - s2     - saved register 2                    */
+    unsigned long s3;         /* x19 - s3     - saved register 3                    */
+    unsigned long s4;         /* x20 - s4     - saved register 4                    */
+    unsigned long s5;         /* x21 - s5     - saved register 5                    */
+    unsigned long s6;         /* x22 - s6     - saved register 6                    */
+    unsigned long s7;         /* x23 - s7     - saved register 7                    */
+    unsigned long s8;         /* x24 - s8     - saved register 8                    */
+    unsigned long s9;         /* x25 - s9     - saved register 9                    */
+    unsigned long s10;        /* x26 - s10    - saved register 10                   */
+    unsigned long s11;        /* x27 - s11    - saved register 11                   */
+    unsigned long t3;         /* x28 - t3     - temporary register 3                */
+    unsigned long t4;         /* x29 - t4     - temporary register 4                */
+    unsigned long t5;         /* x30 - t5     - temporary register 5                */
+    unsigned long t6;         /* x31 - t6     - temporary register 6                */
 #ifdef ARCH_ACORAL_FPU
-    acoral_u32 f0;      /* f0  */
-    acoral_u32 f1;      /* f1  */
-    acoral_u32 f2;      /* f2  */
-    acoral_u32 f3;      /* f3  */
-    acoral_u32 f4;      /* f4  */
-    acoral_u32 f5;      /* f5  */
-    acoral_u32 f6;      /* f6  */
-    acoral_u32 f7;      /* f7  */
-    acoral_u32 f8;      /* f8  */
-    acoral_u32 f9;      /* f9  */
-    acoral_u32 f10;     /* f10 */
-    acoral_u32 f11;     /* f11 */
-    acoral_u32 f12;     /* f12 */
-    acoral_u32 f13;     /* f13 */
-    acoral_u32 f14;     /* f14 */
-    acoral_u32 f15;     /* f15 */
-    acoral_u32 f16;     /* f16 */
-    acoral_u32 f17;     /* f17 */
-    acoral_u32 f18;     /* f18 */
-    acoral_u32 f19;     /* f19 */
-    acoral_u32 f20;     /* f20 */
-    acoral_u32 f21;     /* f21 */
-    acoral_u32 f22;     /* f22 */
-    acoral_u32 f23;     /* f23 */
-    acoral_u32 f24;     /* f24 */
-    acoral_u32 f25;     /* f25 */
-    acoral_u32 f26;     /* f26 */
-    acoral_u32 f27;     /* f27 */
-    acoral_u32 f28;     /* f28 */
-    acoral_u32 f29;     /* f29 */
-    acoral_u32 f30;     /* f30 */
-    acoral_u32 f31;     /* f31 */
+    unsigned int f0;      /* f0  */
+    unsigned int f1;      /* f1  */
+    unsigned int f2;      /* f2  */
+    unsigned int f3;      /* f3  */
+    unsigned int f4;      /* f4  */
+    unsigned int f5;      /* f5  */
+    unsigned int f6;      /* f6  */
+    unsigned int f7;      /* f7  */
+    unsigned int f8;      /* f8  */
+    unsigned int f9;      /* f9  */
+    unsigned int f10;     /* f10 */
+    unsigned int f11;     /* f11 */
+    unsigned int f12;     /* f12 */
+    unsigned int f13;     /* f13 */
+    unsigned int f14;     /* f14 */
+    unsigned int f15;     /* f15 */
+    unsigned int f16;     /* f16 */
+    unsigned int f17;     /* f17 */
+    unsigned int f18;     /* f18 */
+    unsigned int f19;     /* f19 */
+    unsigned int f20;     /* f20 */
+    unsigned int f21;     /* f21 */
+    unsigned int f22;     /* f22 */
+    unsigned int f23;     /* f23 */
+    unsigned int f24;     /* f24 */
+    unsigned int f25;     /* f25 */
+    unsigned int f26;     /* f26 */
+    unsigned int f27;     /* f27 */
+    unsigned int f28;     /* f28 */
+    unsigned int f29;     /* f29 */
+    unsigned int f30;     /* f30 */
+    unsigned int f31;     /* f31 */
 #endif
 }hal_ctx_t;
 
-void HAL_SWITCH_TO(acoral_u32** next);
-void HAL_CONTEXT_SWITCH(acoral_u32 **prev , acoral_u32 **next);
-void HAL_INTR_SWITCH_TO(acoral_u32 **next);
-void HAL_INTR_CTX_SWITCH(acoral_u32 **prev , acoral_u32 **next);
-acoral_u32* hal_stack_init(acoral_u32 *stack, void *route, void *exit, void *args);
+void HAL_SWITCH_TO(unsigned int** next);
+void HAL_CONTEXT_SWITCH(unsigned int **prev , unsigned int **next);
+void HAL_INTR_SWITCH_TO(unsigned int **next);
+void HAL_INTR_CTX_SWITCH(unsigned int **prev , unsigned int **next);
+unsigned int* hal_stack_init(unsigned int *stack, void *route, void *exit, void *args);
 
 //线程相关的硬件抽象接口 //TODO 全大写为了和汇编接口统一
 #define HAL_STACK_INIT(stack,route,exit,args) hal_stack_init(stack, route,exit, args)

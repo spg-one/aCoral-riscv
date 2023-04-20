@@ -16,14 +16,14 @@
 #ifndef ACORAL_MEM_H
 #define ACORAL_MEM_H
 #include "autocfg.h"
-#include "type.h"
+
 #include "hal.h"
 
 /**
  * 伙伴系统部分
 */
-acoral_err buddy_init(acoral_u32 start, acoral_u32 end);
-void* buddy_malloc(acoral_u32  size);
+unsigned int buddy_init(unsigned int start, unsigned int end);
+void* buddy_malloc(unsigned int  size);
 void buddy_free(void *p);
 void buddy_scan(void);
 
@@ -34,7 +34,7 @@ void buddy_scan(void);
 #define acoral_mem_scan() buddy_scan()
 
 #ifdef CFG_MEM2
-   void * v_malloc(acoral_32 size);
+   void * v_malloc(int size);
    void v_free(void * p);
    void v_mem_init(void);
    void v_mem_scan(void);
@@ -55,11 +55,13 @@ enum acoralMemAllocStateEnum{
 };
 
 /**
- * @brief 内存块层数结构体
+ * @brief 内存块层数结构体，用于回收内存块时，描述要回收的内存块的大小。
+ * 因为知道回收的起始地址，所以就知道要回收的这块内存的第一块基本内存块的编号是多少，那只要知道了这个基本内存块是哪一层分配出去的，就知道实际分配了多少大小的内存。
+ * 详见书p131
  * 
  */
 typedef struct{
-	acoral_8 level;
+	char level;
 }acoral_block_t;
 
 /**
@@ -67,23 +69,23 @@ typedef struct{
  * 
  */
 typedef struct{
-	acoral_32 *free_list[LEVEL];  ///<各层空闲位图链表
-	acoral_u32 *bitmap[LEVEL];    ///<各层内存状态位图块，两种情况：一. 最大内存块层，为一块内存空闲与否；二.其余层，1 标识两块相邻内存块有一块空闲，0 标识没有空闲
-	acoral_32 free_cur[LEVEL];    ///<各层空闲位图链表头
-	acoral_u32 num[LEVEL];        ///<各层内存块个数
-	acoral_8 level;               ///<层数 
-	acoral_u8 state;              ///<状态
-	acoral_u32 start_adr;         ///<内存起始地址
-	acoral_u32 end_adr;           ///<内存终止地址
-	acoral_u32 block_num;         ///<基本内存块数
-	acoral_u32 free_num;          ///<空闲基本内存块数
-	acoral_u32 block_size;        ///<基本内存块大小
+	int *free_list[LEVEL];  ///<各层空闲位图链表
+	unsigned int *bitmap[LEVEL];    ///<各层内存状态位图块，两种情况：一. 最大内存块层，为一块内存空闲与否；二.其余层，1 标识两块相邻内存块有一块空闲，0 标识没有空闲
+	int free_cur[LEVEL];    ///<各层空闲位图链表头
+	unsigned int num[LEVEL];        ///<各层内存块个数
+	char level;               ///<层数 
+	unsigned char state;              ///<状态
+	unsigned int start_adr;         ///<内存起始地址
+	unsigned int end_adr;           ///<内存终止地址
+	unsigned int block_num;         ///<基本内存块数
+	unsigned int free_num;          ///<空闲基本内存块数
+	unsigned int block_size;        ///<基本内存块大小
 }acoral_block_ctr_t;
 
 /**
  * 资源系统部分
 */
-#include "type.h"
+
 #include "core.h"
 #include "list.h"
 #define ACORAL_MAX_POOLS 40
@@ -130,8 +132,8 @@ enum acoralResourceReturnValEnum{
 #define ACORAL_RES_TYPE(id) ((id&ACORAL_RES_TYPE_MASK)>>ACORAL_RES_TYPE_BIT) ///<根据资源ID获取某一资源数据块
 
 typedef union {
-   acoral_id id;
-   acoral_u16 next_id;
+   int id;
+   int next_id;
 }acoral_res_t;
 
 /**
@@ -139,14 +141,14 @@ typedef union {
  * 
  */
 typedef struct {
-  acoral_u32 type;
-  acoral_u32 size;            ///<size of one single resource eg.size of TCB
-  acoral_u32 num_per_pool;    ///<the amount of resource in one pool eg.there are 20 TCBs in one TCB pool
-  acoral_u32 num;             ///<the amount of pools which contain a certain type of resource(maybe TCB) in system at present will be added once one pool created; restrict by max_pools below;
-  acoral_u32 max_pools;       ///<upbound of the amount of pools for this type. eg. the number of TCB pool limited to 2 because that there are at most 40 thread in system at one time and every TCB pool contains 20.
+  unsigned int type;
+  unsigned int size;            ///<size of one single resource eg.size of TCB
+  unsigned int num_per_pool;    ///<the amount of resource in one pool eg.there are 20 TCBs in one TCB pool
+  unsigned int num;             ///<the amount of pools which contain a certain type of resource(maybe TCB) in system at present will be added once one pool created; restrict by max_pools below;
+  unsigned int max_pools;       ///<upbound of the amount of pools for this type. eg. the number of TCB pool limited to 2 because that there are at most 40 thread in system at one time and every TCB pool contains 20.
   acoral_list_t *free_pools;
   acoral_list_t *pools,list[2];
-  acoral_u8 *name;
+  unsigned char *name;
 }acoral_pool_ctrl_t;
 
 /**
@@ -155,26 +157,26 @@ typedef struct {
 typedef struct {
    void *base_adr; ///<这个有两个作用，在为空闲的时候,它指向下一个pool，否则为它管理的资源的基地址
    void *res_free;
-   acoral_id id;
-   acoral_u32 size;
-   acoral_u32 num;
-   acoral_u32 position;
-   acoral_u32 free_num;
+   int id;
+   unsigned int size;
+   unsigned int num;
+   unsigned int position;
+   unsigned int free_num;
    acoral_pool_ctrl_t *ctrl;
    acoral_list_t ctrl_list;
    acoral_list_t free_list;
 }acoral_pool_t;
 
 void acoral_mem_sys_init();
-acoral_u32 buddy_malloc_size(acoral_u32 size);
-acoral_pool_t *acoral_get_pool_by_id(acoral_id id);
+unsigned int buddy_malloc_size(unsigned int size);
+acoral_pool_t *acoral_get_pool_by_id(int id);
 acoral_pool_t *acoral_get_free_pool(void);
-acoral_err acoral_create_pool(acoral_pool_ctrl_t *pool_ctrl);
+unsigned int acoral_create_pool(acoral_pool_ctrl_t *pool_ctrl);
 void acoral_pool_res_init(acoral_pool_t *pool);
 void acoral_release_pool(acoral_pool_ctrl_t *pool_ctrl);
 acoral_res_t *acoral_get_res(acoral_pool_ctrl_t *pool_ctrl);
 void acoral_release_res(acoral_res_t *res);
-acoral_res_t * acoral_get_res_by_id(acoral_id id);
+acoral_res_t * acoral_get_res_by_id(int id);
 void acoral_pool_res_init(acoral_pool_t * pool);
 void acoral_res_sys_init(void);
 void acoral_pool_ctrl_init(acoral_pool_ctrl_t *pool_ctrl);

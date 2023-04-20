@@ -1,8 +1,8 @@
-#include "type.h"
+
 #include "bitops.h" //TODO 放到kernel，还有list和queue
-acoral_u32 acoral_ffs(acoral_u32 word)
+unsigned int acoral_ffs(unsigned int word)
 {
-	acoral_u32 k;
+	unsigned int k;
 	k = 31;
 	if (word & 0x0000ffff) { k -= 16; word <<= 16; }
 	if (word & 0x00ff0000) { k -= 8;  word <<= 8;  }
@@ -12,10 +12,10 @@ acoral_u32 acoral_ffs(acoral_u32 word)
         return k;
 }
 
-acoral_u32 acoral_find_first_bit(const acoral_u32 *b,acoral_u32 length)
+unsigned int acoral_find_first_bit(const unsigned int *b,unsigned int length)
 {
-	acoral_u32 v;
-	acoral_u32 off;
+	unsigned int v;
+	unsigned int off;
 
 	for (off = 0; v = b[off], off < length; off++) {
 		if (v)
@@ -24,28 +24,28 @@ acoral_u32 acoral_find_first_bit(const acoral_u32 *b,acoral_u32 length)
 	return acoral_ffs(v) + off * 32;
 }
 
-void acoral_set_bit(acoral_32 nr,acoral_u32 *bitmap)
+void acoral_set_bit(int nr,unsigned int *bitmap)
 {
-	acoral_u32 oldval, mask = 1UL << (nr & 31);
-	acoral_u32 *p;
+	unsigned int oldval, mask = 1UL << (nr & 31);
+	unsigned int *p;
 	p =bitmap+(nr>>5);
 	oldval = *p;
 	*p = oldval | mask;
 }
 
-void acoral_clear_bit(acoral_32 nr,acoral_u32 *bitmap)
+void acoral_clear_bit(int nr,unsigned int *bitmap)
 {
-	acoral_u32 oldval, mask = 1UL << (nr & 31);
-	acoral_u32 *p;
+	unsigned int oldval, mask = 1UL << (nr & 31);
+	unsigned int *p;
 	p =bitmap+(nr >> 5);
 	oldval = *p;
 	*p = oldval &(~mask);
 }
 
-acoral_u32 acoral_get_bit(acoral_32 nr,acoral_u32 *bitmap)
+unsigned int acoral_get_bit(int nr,unsigned int *bitmap)
 {
-	acoral_u32 oldval, mask = 1UL << (nr & 31);
-	acoral_u32 *p;
+	unsigned int oldval, mask = 1UL << (nr & 31);
+	unsigned int *p;
 	p =bitmap+(nr>>5);
 	oldval = *p;
 	return oldval & mask;

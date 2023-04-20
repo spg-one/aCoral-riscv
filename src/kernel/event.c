@@ -3,6 +3,7 @@
 #include "message.h"
 #include "thread.h"
 #include "list.h"
+#include <stdio.h>
 
 acoral_pool_ctrl_t acoral_evt_pool_ctrl;
 void acoral_evt_sys_init(){
@@ -29,7 +30,7 @@ void acoral_evt_init(acoral_evt_t *evt){
 	acoral_init_list(&evt->wait_queue.head);
 }
 
-bool acoral_evt_queue_empty(acoral_evt_t *evt){
+_Bool acoral_evt_queue_empty(acoral_evt_t *evt){
 	return acoral_list_empty(&evt->wait_queue.head);
 }
 

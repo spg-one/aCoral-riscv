@@ -34,9 +34,11 @@
 #include "hal.h"
 #include "lib.h"
 #include <stdio.h>
+#include <stdbool.h>
+
 acoral_queue_t acoral_res_release_queue;
-volatile acoral_u32 acoral_start_sched = false;
-acoral_id daemon_id, idle_id, init_id;
+volatile unsigned int acoral_start_sched = false;
+int daemon_id, idle_id, init_id;
 
 /**
  * @brief aCoral空闲守护线程idle函数

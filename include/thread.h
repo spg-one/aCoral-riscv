@@ -17,7 +17,7 @@
 #ifndef ACORAL_THREAD_H
 #define ACORAL_THREAD_H
 #include "autocfg.h"
-#include "type.h"
+
 #include "list.h"
 #include "mem.h"
 #include "queue.h"
@@ -64,48 +64,48 @@ enum acoralThreadState{
  */
 typedef struct{
   	acoral_res_t res;	///<资源id，线程创建后作为线程id
-	acoral_u8 state;
-	acoral_u8 prio;
-	acoral_u8 policy;
+	unsigned char state;
+	unsigned char prio;
+	unsigned char policy;
 	acoral_list_t ready;	///<用于挂载到全局就绪队列
 	acoral_list_t timeout;
 	acoral_list_t waiting;
 	acoral_list_t global_list;
 	acoral_evt_t* evt;
-	acoral_u32 *stack;
-	acoral_u32 *stack_buttom;
-	acoral_u32 stack_size;
-	acoral_32 delay;
-	acoral_char *name;
-	acoral_id console_id; ///<deprecated
+	unsigned int *stack;
+	unsigned int *stack_buttom;
+	unsigned int stack_size;
+	int delay;
+	char *name;
+	int console_id; ///<deprecated
 	void*	private_data;
 	void*	data;
 }acoral_thread_t;
 
-acoral_id acoral_create_thread(void (*route)(void *args),acoral_u32 stack_size,void *args,acoral_char *name,void *stack,acoral_u32 sched_policy,void *data);
+int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,void *stack,unsigned int sched_policy,void *data);
 void acoral_release_thread(acoral_res_t *thread);
 void acoral_suspend_self(void);
-void acoral_suspend_thread_by_id(acoral_u32 thread_id);
+void acoral_suspend_thread_by_id(unsigned int thread_id);
 void acoral_suspend_thread(acoral_thread_t *thread);
-void acoral_resume_thread_by_id(acoral_u32 thread_id);
+void acoral_resume_thread_by_id(unsigned int thread_id);
 void acoral_resume_thread(acoral_thread_t *thread);
-acoral_err acoral_wait_thread(acoral_thread_t *thread);
-void acoral_delay_self(acoral_u32 ticks);
+unsigned int acoral_wait_thread(acoral_thread_t *thread);
+void acoral_delay_self(unsigned int ticks);
 void acoral_kill_thread(acoral_thread_t *thread);
-void acoral_kill_thread_by_id(acoral_id id);
+void acoral_kill_thread_by_id(int id);
 void acoral_thread_exit(void);
 void acoral_wake_waiting(acoral_thread_t *thread);
-acoral_err acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args),void (*exit)(void),void *args);
+unsigned int acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args),void (*exit)(void),void *args);
 acoral_thread_t *acoral_alloc_thread(void);
 void acoral_thread_pool_init(void);
 void acoral_waitqueue_del(acoral_thread_t *thread);
 void acoral_thread_sys_init(void);
 void acoral_unrdy_thread(acoral_thread_t *thread);
 void acoral_rdy_thread(acoral_thread_t *thread);
-void acoral_thread_move2_tail_by_id(acoral_id thread_id);
+void acoral_thread_move2_tail_by_id(int thread_id);
 void acoral_thread_move2_tail(acoral_thread_t *thread);
 extern acoral_queue_t acoral_threads_queue;
-void acoral_thread_change_prio(acoral_thread_t* thread, acoral_u32 prio);
-void acoral_change_prio_self(acoral_u32 prio);
+void acoral_thread_change_prio(acoral_thread_t* thread, unsigned int prio);
+void acoral_change_prio_self(unsigned int prio);
 #endif
 

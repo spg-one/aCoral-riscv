@@ -14,10 +14,10 @@ enum parse_state {
 	PS_ESCAPE
 };
 
-void parse_args(acoral_char *argstr, acoral_32 *argc_p, acoral_char **argv, acoral_char** resid,enum parse_state *stacked)
+void parse_args(char *argstr, int *argc_p, char **argv, char** resid,enum parse_state *stacked)
 {
-	acoral_32 argc = 0;
-	acoral_char c;
+	int argc = 0;
+	char c;
 	enum parse_state newState;
 	enum parse_state stacked_state=*stacked;
 	enum parse_state lastState = PS_WHITESPACE;
@@ -78,7 +78,7 @@ void add_command(acoral_shell_cmd_t *cmd)
 	}
 }
 
-acoral_shell_cmd_t *find_cmd(const acoral_char *cmdname)
+acoral_shell_cmd_t *find_cmd(const char *cmdname)
 {
 	acoral_shell_cmd_t *curr;
 	curr =head_cmd;
@@ -90,7 +90,7 @@ acoral_shell_cmd_t *find_cmd(const acoral_char *cmdname)
 	return NULL;
 }
 
-void execmd(acoral_32 argc,const acoral_char **argv)
+void execmd(int argc,const char **argv)
 {
 	acoral_shell_cmd_t *cmd = find_cmd(argv[0]);
 	if (cmd == NULL) {
@@ -102,16 +102,16 @@ void execmd(acoral_32 argc,const acoral_char **argv)
 }
 
 
-void cmd_exe(acoral_char *buf){
-	acoral_32 argc;
-	acoral_char *argv[MAX_ARGS_NUM];
-	acoral_char *resid;
+void cmd_exe(char *buf){
+	int argc;
+	char *argv[MAX_ARGS_NUM];
+	char *resid;
 	enum parse_state stacked_state;
 	while (*buf) {
 		memset(argv, 0, sizeof(argv));
 		parse_args(buf, &argc, argv, &resid,&stacked_state);
 		if (argc > 0)
-			execmd(argc, (const acoral_char **)argv);//TODO 保留const？
+			execmd(argc, (const char **)argv);//TODO 保留const？
 		buf = resid;
 	}	
 }
@@ -130,7 +130,7 @@ void acoral_shell_init(void){
 
 
 void acoral_shell_enter(void *args){
-	acoral_char *cmd_buf;
+	char *cmd_buf;
 	cmd_buf=acoral_malloc(sizeof(BUF_SIZE));
 	while(1){
 		printf("\r\n");

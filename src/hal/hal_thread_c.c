@@ -12,7 +12,7 @@
  *   <tr><td> 1.0 <td>王彬浩 <td> 2022-07-22 <td>Standardized 
  *  </table>
  */
-#include "type.h"
+
 #include "hal_thread.h"
 #include <stdio.h>
 /**
@@ -26,25 +26,25 @@
 
 #define ACORAL_ALIGN_DOWN(size, align)      ((size) & ~((align) - 1))
 
-acoral_u32* hal_stack_init(acoral_u32 *stack, void *route, void *exit, void *args)
+unsigned int* hal_stack_init(unsigned int *stack, void *route, void *exit, void *args)
 {
     hal_ctx_t *frame;
-    acoral_u32 *stk;
+    unsigned int *stk;
     int i;
     
-    stk  = stack + sizeof(acoral_u32);
-    stk  = (acoral_u32 *)ACORAL_ALIGN_DOWN((acoral_u32)stk, 8);
+    stk  = stack + sizeof(unsigned int);
+    stk  = (unsigned int *)ACORAL_ALIGN_DOWN((unsigned int)stk, 8);
     stk -= sizeof(hal_ctx_t);
 
     frame = (hal_ctx_t *)stk;
 
-    for (i = 0; i < sizeof(hal_ctx_t) / sizeof(acoral_u64); i++)
+    for (i = 0; i < sizeof(hal_ctx_t) / sizeof(unsigned long); i++)
     {
-        ((acoral_u64 *)frame)[i] = 0xdeadbeef;
+        ((unsigned long *)frame)[i] = 0xdeadbeef;
     }
-    frame->ra      = (acoral_u64)exit;
-    frame->a0      = (acoral_u64)args;
-    frame->epc     = (acoral_u64)route;
+    frame->ra      = (unsigned long)exit;
+    frame->a0      = (unsigned long)args;
+    frame->epc     = (unsigned long)route;
 
     /* force to machine mode(MPP=11) and set MPIE to 1 */
     frame->mstatus = 0x00007880;

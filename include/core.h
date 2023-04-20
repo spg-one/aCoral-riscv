@@ -17,14 +17,14 @@
 #define ACORAL_CORE_H
 
 #include "autocfg.h"
-#include "type.h"
+
 
 
 ///aCoral每秒100次tick中断
 #define ACORAL_TICKS_PER_SEC CFG_TICKS_PER_SEC
 
-volatile extern acoral_u32 acoral_start_sched;
-extern acoral_id daemon_id;
+volatile extern unsigned int acoral_start_sched;
+extern int daemon_id;
 void acoral_module_init(void);
 void acoral_init_call(void);
 void acoral_thread_sys_init(void);

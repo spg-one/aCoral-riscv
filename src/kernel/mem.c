@@ -2,8 +2,8 @@
  * @file mem.c
  * @author 王彬浩 (SPGGOGOGO@outlook.com)
  * @brief kernel层，整合了伙伴系统和资源池系统初始化的两级内存管理系统
- * @version 1.0
- * @date 2022-07-04
+ * @version 1.2
+ * @date 2023-04-20
  * @copyright Copyright (c) 2023
  * @revisionHistory
  *  <table>
@@ -11,13 +11,13 @@
  *   <tr><td> 0.1 <td>jivin <td>2010-03-08 <td>Created
  *   <tr><td> 1.0 <td>王彬浩 <td> 2022-07-04 <td>Standardized, add acoral_res_sys_init
  * 	 <tr><td> 1.1 <td>王彬浩 <td> 2022-07-06 <td>将resource.c 和 buddy.c放进来
+ *   <tr><td> 1.2 <td>王彬浩 <td> 2023-04-20 <td>optimized
  *  </table>
  */
 
 #include "autocfg.h"
 #include "hal.h"
 #include "mem.h"
-#include "type.h" //TODO 改名字位资源
 #include "queue.h"
 #include "core.h"
 #include "int.h"
@@ -25,10 +25,8 @@
 #include <stdio.h>
 #include "bitops.h"
 
-
-
-extern int _heap_start;
-extern int _heap_end;
+extern int _heap_start; ///<堆内存起始地址，定义于链接脚本
+extern int _heap_end; ///<堆内存结束地址，定义于链接脚本
 
 /**
  * @brief 内存管理系统初始化
@@ -36,7 +34,7 @@ extern int _heap_end;
  */
 void acoral_mem_sys_init()
 {
-	acoral_mem_init((acoral_u32)&_heap_start, (acoral_u32)&_heap_end); //伙伴系统初始化
+	acoral_mem_init((unsigned int)&_heap_start, (unsigned int)&_heap_end); //伙伴系统初始化
 #ifdef CFG_MEM2
 	acoral_mem_init2(); //任意大小内存分配系统初始化
 #endif
@@ -45,13 +43,8 @@ void acoral_mem_sys_init()
 
 /*伙伴系统部分*/
 
-extern volatile acoral_u32 acoral_start_sched;
-
-///内存控制块实例指针
-acoral_block_ctr_t *acoral_mem_ctrl;
-
-///内存块层数实例指针
-acoral_block_t *acoral_mem_blocks;
+acoral_block_ctr_t *acoral_mem_ctrl; ///<内存控制块,只有一个
+acoral_block_t *acoral_mem_blocks; ///<这是一个数组，每个基本内存块对应一个
 
 /**
  * @brief 伙伴系统扫描，查看是否有空闲块
@@ -59,9 +52,9 @@ acoral_block_t *acoral_mem_blocks;
  */
 void buddy_scan()
 {
-	acoral_u32 i, k, n;
-	acoral_u32 num_perlevel;
-	acoral_u32 max_level = acoral_mem_ctrl->level;
+	unsigned int i, k, n;
+	unsigned int num_perlevel;
+	unsigned int max_level = acoral_mem_ctrl->level;
 	for (i = 0; i < max_level; i++)
 	{
 		printf("Level%d\r\n", i);
@@ -87,19 +80,19 @@ void buddy_scan()
  *
  * @param start_adr
  * @param end_adr
- * @return acoral_err
+ * @return unsigned int
  */
-acoral_err buddy_init(acoral_u32 start_adr, acoral_u32 end_adr)
+unsigned int buddy_init(unsigned int start_adr, unsigned int end_adr)
 {
-	acoral_32 i, k;
-	acoral_u32 resize_size;
-	acoral_u32 save_adr;
-	acoral_u32 index;
-	acoral_u32 num = 1;
-	acoral_u32 adjust_level = 1;
-	acoral_32 level = 0;
-	acoral_u32 max_num, o_num;
-	acoral_u32 cur;
+	int i, k;
+	unsigned int resize_size;
+	unsigned int save_adr;
+	unsigned int index;
+	unsigned int num = 1;
+	unsigned int adjust_level = 1;
+	int level = 0;
+	unsigned int max_num, o_num;
+	unsigned int cur;
 	start_adr += 3;
 	start_adr &= ~(4 - 1); //首地址四字节对齐
 	end_adr &= ~(4 - 1);   //尾地址四字节对齐
@@ -125,7 +118,7 @@ acoral_err buddy_init(acoral_u32 start_adr, acoral_u32 end_adr)
 		adjust_level++;
 	}
 	acoral_mem_blocks = (acoral_block_t *)end_adr - num;
-	save_adr = (acoral_u32)acoral_mem_blocks;
+	save_adr = (unsigned int)acoral_mem_blocks;
 	level = adjust_level; //实际层数
 	//如果层数较小，则最大层用一块构成，如果层数较多，限制层数范围，最大层由多块构成
 	if (adjust_level > LEVEL)
@@ -141,11 +134,11 @@ acoral_err buddy_init(acoral_u32 start_adr, acoral_u32 end_adr)
 
 		save_adr -= num * 4;								 //每一个32位位图为4个字节
 		save_adr &= ~(4 - 1);								 //四字节对齐
-		acoral_mem_ctrl->bitmap[i] = (acoral_u32 *)save_adr; //当层bitmap地址
+		acoral_mem_ctrl->bitmap[i] = (unsigned int *)save_adr; //当层bitmap地址
 		acoral_mem_ctrl->num[i] = num;
 		save_adr -= num * 4;								   //每一个32位位图为4个字节
 		save_adr &= ~(4 - 1);								   //四字节对齐
-		acoral_mem_ctrl->free_list[i] = (acoral_32 *)save_adr; //当层free_list地址
+		acoral_mem_ctrl->free_list[i] = (int *)save_adr; //当层free_list地址
 		for (k = 0; k < num; k++)
 		{
 			acoral_mem_ctrl->bitmap[i][k] = 0;	   //初始化当层bitmap
@@ -161,11 +154,11 @@ acoral_err buddy_init(acoral_u32 start_adr, acoral_u32 end_adr)
 	}
 	save_adr -= num * 4;
 	save_adr &= ~(4 - 1);
-	acoral_mem_ctrl->bitmap[i] = (acoral_u32 *)save_adr;
+	acoral_mem_ctrl->bitmap[i] = (unsigned int *)save_adr;
 	acoral_mem_ctrl->num[i] = num;
 	save_adr -= num * 4;
 	save_adr &= ~(4 - 1);
-	acoral_mem_ctrl->free_list[i] = (acoral_32 *)save_adr;
+	acoral_mem_ctrl->free_list[i] = (int *)save_adr;
 	for (k = 0; k < num; k++)
 	{
 		acoral_mem_ctrl->bitmap[i][k] = 0;
@@ -253,13 +246,13 @@ acoral_err buddy_init(acoral_u32 start_adr, acoral_u32 end_adr)
  * @brief 迭代获取空闲块的首num
  *
  * @param level 要获取的层数，起始为0
- * @return acoral_32 空闲块的首num
+ * @return int 空闲块的首num
  */
-static acoral_32 recus_malloc(acoral_32 level)
+static int recus_malloc(int level)
 {
-	acoral_u32 index;
-	acoral_32 cur;
-	acoral_32 num;
+	unsigned int index;
+	int cur;
+	int num;
 	if (level >= acoral_mem_ctrl->level) //层数超出范围
 		return -1;
 	cur = acoral_mem_ctrl->free_cur[level]; //获取首个空闲位图
@@ -308,10 +301,10 @@ static acoral_32 recus_malloc(acoral_32 level)
  * @param level 要分配的层数，起始为0
  * @return void* 返回分配的地址
  */
-static void *r_malloc(acoral_u8 level)
+static void *r_malloc(unsigned char level)
 {
-	acoral_u32 index;
-	acoral_32 num, cur;
+	unsigned int index;
+	int num, cur;
 	acoral_enter_critical();
 	acoral_mem_ctrl->free_num -= 1 << level; //提前减去即将分配的基本内存块数
 	cur = acoral_mem_ctrl->free_cur[level];
@@ -371,13 +364,13 @@ static void *r_malloc(acoral_u8 level)
  * @brief 用户指定的内存大小不一定合适，可以先用这个函数进行一下调整
  *
  * @param size 用户想使用内存的大小
- * @return acoral_u32 实际将要分配的内存大小
+ * @return unsigned int 实际将要分配的内存大小
  */
-acoral_u32 buddy_malloc_size(acoral_u32 size)
+unsigned int buddy_malloc_size(unsigned int size)
 {
-	acoral_u32 resize_size;
-	acoral_u8 level = 0;
-	acoral_u32 num = 1;
+	unsigned int resize_size;
+	unsigned char level = 0;
+	unsigned int num = 1;
 	resize_size = BASIC_BLOCK_SIZE;
 	if (acoral_mem_ctrl->state == MEM_NO_ALLOC)
 		return 0;
@@ -396,11 +389,11 @@ acoral_u32 buddy_malloc_size(acoral_u32 size)
  * @param size 用户需要的大小
  * @return void* 返回分配的地址
  */
-void *buddy_malloc(acoral_u32 size)
+void *buddy_malloc(unsigned int size)
 {
-	acoral_u32 resize_size;
-	acoral_u8 level = 0;
-	acoral_u32 num = 1;
+	unsigned int resize_size;
+	unsigned char level = 0;
+	unsigned int num = 1;
 	resize_size = BASIC_BLOCK_SIZE;
 	if (acoral_mem_ctrl->state == MEM_NO_ALLOC)
 		return NULL;
@@ -424,14 +417,14 @@ void *buddy_malloc(acoral_u32 size)
  */
 void buddy_free(void *ptr)
 {
-	acoral_8 level;
-	acoral_8 buddy_level;
-	acoral_32 cur;
-	acoral_u32 index;
-	acoral_u32 num;
-	acoral_u32 max_level;
-	acoral_u32 adr;
-	adr = (acoral_u32)ptr;
+	unsigned char level;
+	unsigned char buddy_level;
+	int cur;
+	unsigned int index;
+	unsigned int num;
+	unsigned int max_level;
+	unsigned int adr;
+	adr = (unsigned int)ptr;
 	if (acoral_mem_ctrl->state == MEM_NO_ALLOC)
 	{
 		return;
@@ -542,9 +535,9 @@ acoral_pool_t *acoral_free_res_pool;
  * @note 创建的时机包括系统刚初始化时，以及系统中空闲资源池不够时
  *
  * @param pool_ctrl 某一类型资源池的控制块
- * @return acoral_err
+ * @return unsigned int
  */
-acoral_err acoral_create_pool(acoral_pool_ctrl_t *pool_ctrl)
+unsigned int acoral_create_pool(acoral_pool_ctrl_t *pool_ctrl)
 {
 	acoral_pool_t *pool;
 	if (pool_ctrl->num >= pool_ctrl->max_pools)
@@ -625,7 +618,7 @@ acoral_res_t *acoral_get_res(acoral_pool_ctrl_t *pool_ctrl)
 	}
 	pool = list_entry(first, acoral_pool_t, free_list);
 	res = (acoral_res_t *)pool->res_free;
-	pool->res_free = (void *)((acoral_u8 *)pool->base_adr + res->next_id * pool->size);
+	pool->res_free = (void *)((unsigned char *)pool->base_adr + res->next_id * pool->size);
 	res->id = (res->id >> (ACORAL_RES_INDEX_INIT_BIT - ACORAL_RES_INDEX_BIT)) & ACORAL_RES_INDEX_MASK | pool->id;
 	pool->free_num--;
 	if (!pool->free_num)
@@ -644,7 +637,7 @@ acoral_res_t *acoral_get_res(acoral_pool_ctrl_t *pool_ctrl)
 void acoral_release_res(acoral_res_t *res)
 {
 	acoral_pool_t *pool;
-	acoral_u32 index;
+	unsigned int index;
 	void *tmp;
 	acoral_pool_ctrl_t *pool_ctrl;
 	if (res == NULL || acoral_get_res_by_id(res->id) != res)
@@ -663,7 +656,7 @@ void acoral_release_res(acoral_res_t *res)
 		printf("Err Res\n");
 		return;
 	}
-	index = (((acoral_u32)res - (acoral_u32)pool->base_adr) / pool->size);
+	index = (((unsigned int)res - (unsigned int)pool->base_adr) / pool->size);
 	if (index >= pool->num)
 	{
 		printf("Err Res\n");
@@ -685,9 +678,9 @@ void acoral_release_res(acoral_res_t *res)
  * @param res_id 资源ID
  * @return acoral_pool_t* 获取到的资源池指针
  */
-acoral_pool_t *acoral_get_pool_by_id(acoral_id res_id)
+acoral_pool_t *acoral_get_pool_by_id(int res_id)
 {
-	acoral_u32 index;
+	unsigned int index;
 	index = (res_id & ACORAL_POOL_INDEX_MASK) >> ACORAL_POOL_INDEX_BIT;
 	if (index < ACORAL_MAX_POOLS)
 		return acoral_pools + index;
@@ -718,15 +711,15 @@ acoral_pool_t *acoral_get_free_pool()
  * @param id 资源id
  * @return acoral_res_t* 获取到的资源
  */
-acoral_res_t *acoral_get_res_by_id(acoral_id id)
+acoral_res_t *acoral_get_res_by_id(int id)
 {
 	acoral_pool_t *pool;
-	acoral_u32 index;
+	unsigned int index;
 	pool = acoral_get_pool_by_id(id);
 	if (pool == NULL)
 		return NULL;
 	index = (id & ACORAL_RES_INDEX_MASK) >> ACORAL_RES_INDEX_BIT;
-	return (acoral_res_t *)((acoral_u8 *)pool->base_adr + index * pool->size);
+	return (acoral_res_t *)((unsigned char *)pool->base_adr + index * pool->size);
 }
 
 /**
@@ -737,12 +730,12 @@ acoral_res_t *acoral_get_res_by_id(acoral_id id)
 void acoral_pool_res_init(acoral_pool_t *pool)
 {
 	acoral_res_t *res;
-	acoral_u32 i;
-	acoral_u8 *pblk;
-	acoral_u32 blks;
+	unsigned int i;
+	unsigned char *pblk;
+	unsigned int blks;
 	blks = pool->num;
 	res = (acoral_res_t *)pool->base_adr;
-	pblk = (acoral_u8 *)pool->base_adr + pool->size;
+	pblk = (unsigned char *)pool->base_adr + pool->size;
 	for (i = 0; i < (blks - 1); i++)
 	{
 		res->id = i << ACORAL_RES_INDEX_INIT_BIT;
@@ -761,7 +754,7 @@ void acoral_pool_res_init(acoral_pool_t *pool)
  */
 void acoral_pool_ctrl_init(acoral_pool_ctrl_t *pool_ctrl)
 {
-	acoral_u32 size;
+	unsigned int size;
 	pool_ctrl->free_pools = &pool_ctrl->list[0];
 	pool_ctrl->pools = &pool_ctrl->list[1];
 	pool_ctrl->num = 0;
@@ -789,7 +782,7 @@ void acoral_pool_ctrl_init(acoral_pool_ctrl_t *pool_ctrl)
 void acoral_res_sys_init()
 {
 	acoral_pool_t *pool;
-	acoral_u32 i;
+	unsigned int i;
 	pool = &acoral_pools[0];
 	for (i = 0; i < (ACORAL_MAX_POOLS - 1); i++)
 	{

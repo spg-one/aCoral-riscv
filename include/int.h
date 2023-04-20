@@ -14,19 +14,18 @@
  */
 #ifndef ACORAL_INT_H
 #define ACORAL_INT_H
-#include "type.h"
 
 /**
  * @brief 中断结构体
  * 
  */
 typedef struct {
-	acoral_u8  type;				///<上面三种中断类型
-	void (*isr)(acoral_vector);		///<中断服务程序
-	void (*enter)(acoral_vector);	///<中断服务程序执行之前执行的操作，aCroal中为hal_intr_ack函数
-	void (*exit)(acoral_vector);	///<中断服务程序执行完成后的操作，比如置中断结束，目前aCoral中没有这个操作
-	void (*mask)(acoral_vector);	///<除能中断操作
-	void (*unmask)(acoral_vector);	///<使能中断操作
+	unsigned char  type;				///<上面三种中断类型
+	void (*isr)(int);		///<中断服务程序
+	void (*enter)(int);	///<中断服务程序执行之前执行的操作，aCroal中为hal_intr_ack函数
+	void (*exit)(int);	///<中断服务程序执行完成后的操作，比如置中断结束，目前aCoral中没有这个操作
+	void (*mask)(int);	///<除能中断操作
+	void (*unmask)(int);	///<使能中断操作
 }acoral_intr_ctr_t;
 
 #define acoral_intr_enable() HAL_INTR_ENABLE()
@@ -37,12 +36,12 @@ typedef struct {
 #define acoral_enter_critical() HAL_ENTER_CRITICAL()
 #define acoral_exit_critical() HAL_EXIT_CRITICAL()
 
-acoral_32 acoral_intr_attach(acoral_vector vector,void (*isr)(acoral_vector));
-acoral_32 acoral_intr_detach(acoral_vector vector);
-void acoral_intr_entry(acoral_vector vector);
-void acoral_intr_unmask(acoral_vector vector);
-void acoral_intr_mask(acoral_vector vector);
-void acoral_default_isr(acoral_vector vector);
+int acoral_intr_attach(int vector,void (*isr)(int));
+int acoral_intr_detach(int vector);
+void acoral_intr_entry(int vector);
+void acoral_intr_unmask(int vector);
+void acoral_intr_mask(int vector);
+void acoral_default_isr(int vector);
 void acoral_intr_exit(void);
 void acoral_intr_sys_init();
 #endif

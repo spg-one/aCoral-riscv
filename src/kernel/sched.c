@@ -12,7 +12,7 @@
  *   <tr><td> 1.0 <td>王彬浩 <td> 2022-07-28 <td>Standardized
  *  </table>
  */
-#include "type.h"
+
 #include "hal.h"
 #include "thread.h"
 #include "int.h"
@@ -20,9 +20,10 @@
 #include "queue.h"
 #include "list.h"
 #include "bitops.h"
+#include <stdbool.h>
 
-acoral_u8 acoral_need_sched; ///< aCoral是否需要调度标志，仅当aCoral就绪队列acoral_ready_queues有线程加入或被取下时，该标志被置为true；仅当aCoral在调度线程时，该标志位被置为false
-acoral_u8 sched_lock = 1;	 ///< aCoral初始化完成之前，调度都是被上锁的，即不允许调度。
+unsigned char acoral_need_sched; ///< aCoral是否需要调度标志，仅当aCoral就绪队列acoral_ready_queues有线程加入或被取下时，该标志被置为true；仅当aCoral在调度线程时，该标志位被置为false
+unsigned char sched_lock = 1;	 ///< aCoral初始化完成之前，调度都是被上锁的，即不允许调度。
 acoral_thread_t *acoral_cur_thread, *acoral_ready_thread;
 
 static acoral_rdy_queue_t acoral_ready_queues;
@@ -31,7 +32,7 @@ static acoral_rdy_queue_t acoral_ready_queues;
 /*后面初始化就绪队列的操作就会修改0地址的异常向量表，导致时钟中断被打开后，无法正常进入中断服务*/
 /*很恐怖的bug！！谨此记录*/
 
-void acoral_prio_queue_add(acoral_rdy_queue_t *array, acoral_u8 prio, acoral_list_t *list)
+void acoral_prio_queue_add(acoral_rdy_queue_t *array, unsigned char prio, acoral_list_t *list)
 {
 	acoral_queue_t *queue;
 	acoral_list_t *head;
@@ -42,7 +43,7 @@ void acoral_prio_queue_add(acoral_rdy_queue_t *array, acoral_u8 prio, acoral_lis
 	acoral_set_bit(prio, array->bitmap);
 }
 
-void acoral_prio_queue_del(acoral_rdy_queue_t *array, acoral_u8 prio, acoral_list_t *list)
+void acoral_prio_queue_del(acoral_rdy_queue_t *array, unsigned char prio, acoral_list_t *list)
 {
 	acoral_queue_t *queue;
 	acoral_list_t *head;
@@ -54,14 +55,14 @@ void acoral_prio_queue_del(acoral_rdy_queue_t *array, acoral_u8 prio, acoral_lis
 		acoral_clear_bit(prio, array->bitmap);
 }
 
-acoral_u32 acoral_get_highprio(acoral_rdy_queue_t *array)
+unsigned int acoral_get_highprio(acoral_rdy_queue_t *array)
 {
 	return acoral_find_first_bit(array->bitmap, PRIO_BITMAP_SIZE);
 }
 
 void acoral_prio_queue_init(acoral_rdy_queue_t *array)
 {
-	acoral_u8 i;
+	unsigned char i;
 	acoral_queue_t *queue;
 	acoral_list_t *head;
 	array->num = 0;
@@ -220,7 +221,7 @@ void acoral_real_intr_sched()
  *================================*/
 void acoral_select_thread()
 {
-	acoral_u32 index;
+	unsigned int index;
 	acoral_rdy_queue_t *rdy_queue;
 	acoral_list_t *head;
 	acoral_thread_t *thread;
