@@ -1,5 +1,18 @@
+/**
+ * @file period_thrd.c
+ * @author 王彬浩 (SPGGOGOGO@outlook.com)
+ * @brief kernel层，周期线程
+ * @version 1.0
+ * @date 2023-05-08
+ * @copyright Copyright (c) 2023
+ * @revisionHistory
+ *  <table>
+ *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
+ *   <tr><td> 0.1 <td>jivin <td> 2010-03-08 <td>Created
+ *   <tr><td> 1.0 <td>王彬浩 <td> 2023-05-08 <td>Standardized
+ *  </table>
+ */
 
-#include "queue.h"
 #include "thread.h"
 #include "hal.h"
 #include "policy.h"
@@ -9,7 +22,7 @@
 #include "int.h"
 #include <stdio.h>
 
-acoral_queue_t period_delay_queue;
+acoral_list_t period_delay_queue; ///<周期线程专用延时队列，只要是周期线程，就会被挂载到这个队列上，延时时间就是周期，每次周期过后重新挂载
 int period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
 	unsigned int prio;
 	acoral_period_policy_data_t *policy_data;
@@ -67,7 +80,7 @@ void acoral_periodqueue_add(acoral_thread_t *new){
 	acoral_thread_t *thread;
 	int  delay2;
 	int  delay= new->delay;
-	head=&period_delay_queue.head;
+	head=&period_delay_queue;
 	new->state|=ACORAL_THREAD_STATE_DELAY;
 	for (tmp=head->next;delay2=delay,tmp!=head; tmp=tmp->next){
 		thread = list_entry (tmp, acoral_thread_t, waiting);
@@ -93,7 +106,7 @@ void period_delay_deal(){
 	acoral_list_t *tmp,*tmp1,*head;
 	acoral_thread_t * thread;
 	period_private_data_t * private_data;
-	head=&period_delay_queue.head;
+	head=&period_delay_queue;
 	if(acoral_list_empty(head))
 	    	return;
 	thread=list_entry(head->next,acoral_thread_t,waiting);
@@ -122,7 +135,7 @@ void period_thread_exit(){
 
 acoral_sched_policy_t period_policy;
 void period_policy_init(void){
-	acoral_init_list(&period_delay_queue.head);
+	acoral_init_list(&period_delay_queue);
 	period_policy.type=ACORAL_SCHED_POLICY_PERIOD;
 	period_policy.policy_thread_init=period_policy_thread_init;
 	period_policy.policy_thread_release=period_policy_thread_release;

@@ -15,7 +15,6 @@
 
 
 #include "hal.h"
-#include "queue.h"
 #include "lsched.h"
 #include "error.h"
 #include "timer.h"
@@ -25,23 +24,11 @@
 #include "policy.h"
 #include <stdio.h>
 
-extern acoral_queue_t acoral_res_release_queue;
+extern acoral_list_t acoral_res_release_queue;
 extern void acoral_evt_queue_del(acoral_thread_t *thread);
-acoral_queue_t acoral_threads_queue;
+acoral_list_t acoral_threads_queue; ///<aCoral全局所有线程队列
 acoral_pool_ctrl_t acoral_thread_pool_ctrl;
 
-/**
- * @brief 创建一个线程
- * 
- * @param route 线程函数
- * @param stack_size 线程栈大小
- * @param args 线程函数参数
- * @param name 线程名字
- * @param stack 线程栈指针
- * @param sched_policy 线程调度策略
- * @param data 线程策略数据
- * @return int 返回线程id
- */
 int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,void *stack,unsigned int sched_policy,void *data){
 	acoral_thread_t *thread;
         /*分配tcb数据块*/
@@ -68,11 +55,12 @@ int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void 
  *   thread     
  *    
  *================================*/
-void acoral_release_thread1(acoral_thread_t *thread){
+extern int daemon_id;
+void acoral_release_thread1(acoral_thread_t *thread){//SPG这个和acoral_release_thread有什么区别
 	acoral_list_t *head;
 	acoral_thread_t *daem;
 	thread->state=ACORAL_THREAD_STATE_EXIT;
-	head=&acoral_res_release_queue.head;
+	head=&acoral_res_release_queue;
 	acoral_list_add2_tail(&thread->waiting,head);
 
 	daem=(acoral_thread_t *)acoral_get_res_by_id(daemon_id);
@@ -147,6 +135,7 @@ void acoral_resume_thread_by_id(unsigned int thread_id){
  *         	
  * thread(TCB) 	
  *================================*/
+
 void acoral_resume_thread(acoral_thread_t *thread){
 	if(!(thread->state&ACORAL_THREAD_STATE_SUSPEND))
 		return;
@@ -166,6 +155,7 @@ void acoral_resume_thread(acoral_thread_t *thread){
  * timems	
  *      
  *================================*/
+
 static void acoral_delay_thread(acoral_thread_t* thread,unsigned int time){
 	unsigned int real_ticks;
 	if(!acoral_list_empty(&thread->waiting)){
@@ -173,7 +163,7 @@ static void acoral_delay_thread(acoral_thread_t* thread,unsigned int time){
 	}
 
 	/*timeticks*/
-	/*real_ticks=time*ACORAL_TICKS_PER_SEC/1000;*/
+	/*real_ticks=time*CFG_TICKS_PER_SEC/1000;*/
 	real_ticks = TIME_TO_TICKS(time);
 	thread->delay=real_ticks;
 	/**/
@@ -349,7 +339,7 @@ unsigned int acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args
 	acoral_init_list(&thread->global_list);
 
 	acoral_enter_critical();
-	acoral_list_add2_tail(&thread->global_list,&acoral_threads_queue.head);
+	acoral_list_add2_tail(&thread->global_list,&acoral_threads_queue);
 	acoral_exit_critical();
 	return 0;
 }
@@ -372,13 +362,9 @@ void acoral_thread_pool_init(){
 void acoral_sched_mechanism_init(){
 	acoral_thread_pool_init();
 	acoral_thread_runqueue_init();
-	acoral_init_list(&acoral_threads_queue.head);
+	acoral_init_list(&acoral_threads_queue);
 }
 
-/*================================
- *      init thread system 
- *       
- *================================*/
 void acoral_thread_sys_init(){
 	acoral_sched_mechanism_init();
 	acoral_sched_policy_init();

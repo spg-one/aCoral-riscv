@@ -7,7 +7,7 @@
 void display_thread(int argc,char **argv){	
 	acoral_list_t *head,*tmp;
 	acoral_thread_t * thread;
-	head=&acoral_threads_queue.head;
+	head=&acoral_threads_queue;
 	printf("\t\tSystem Thread Information\r\n");
 	printf("------------------------------------------------------\r\n");
 	printf("Name\t\tType\t\tState\t\tPrio\r\n");

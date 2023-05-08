@@ -1,3 +1,18 @@
+/**
+ * @file shell.c
+ * @author 王彬浩 (SPGGOGOGO@outlook.com)
+ * @brief kernel层，aCoral shell
+ * @version 1.0
+ * @date 2023-05-08
+ * @copyright Copyright (c) 2023
+ * @revisionHistory
+ *  <table>
+ *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
+ *   <tr><td> 0.1 <td>jivin <td> 2010-03-08 <td>Created
+ *   <tr><td> 1.0 <td>王彬浩 <td> 2023-05-08 <td>Standardized
+ *  </table>
+ */
+
 #include<acoral.h>
 #include "shell.h"
 #include "thread.h"
@@ -7,12 +22,6 @@
 #define BUF_SIZE 128
 #define MAX_ARGS_NUM 8
 acoral_shell_cmd_t *head_cmd,*tail_cmd;
-enum parse_state {
-	PS_WHITESPACE,
-	PS_TOKEN,
-	PS_STRING,
-	PS_ESCAPE
-};
 
 void parse_args(char *argstr, int *argc_p, char **argv, char** resid,enum parse_state *stacked)
 {

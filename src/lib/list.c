@@ -1,7 +1,7 @@
 /**
  * @file list.c
  * @author 王彬浩 (SPGGOGOGO@outlook.com)
- * @brief lib层
+ * @brief lib层，aCoral队列机制
  * @version 1.0
  * @date 2023-04-19
  * @copyright Copyright (c) 2023
@@ -30,7 +30,6 @@ void acoral_list_add2_tail(acoral_list_t *new, acoral_list_t *head)
 	head->prev=new;
 }
 
-//从list中删除entry节点
 void acoral_list_del(acoral_list_t *entry)
 {
 	entry->prev->next= entry->next;

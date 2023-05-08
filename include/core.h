@@ -18,19 +18,53 @@
 
 #include "autocfg.h"
 
-
-
-///aCoral每秒100次tick中断
-#define ACORAL_TICKS_PER_SEC CFG_TICKS_PER_SEC
-
 volatile extern unsigned int acoral_start_sched;
-extern int daemon_id;
+
+#define DAEM_STACK_SIZE 256
+#define IDLE_STACK_SIZE 128
+
+/**
+ * @brief aCoral空闲守护线程idle函数
+ *
+ * @param args
+ */
+void idle(void *args);
+
+/**
+ * @brief aCoral资源回收线程daem函数
+ *
+ * @param args
+ */
+void daem(void *args);
+
+/**
+ * @brief aCoral初始化线程init函数
+ *
+ * @param args
+ */
+void init(void *args);
+
+/**
+ * @brief aCoral内核各模块初始化
+ * 
+ */
 void acoral_module_init(void);
-void acoral_init_call(void);
-void acoral_thread_sys_init(void);
+
+/**
+ * @brief  c语言初始化入口函数
+ * 
+ */
 void acoral_start(void);
+
+/**
+ * @brief CPU开始创建线程工作，创建idle线程、init线程
+ * 
+ */
 void acoral_core_cpu_start(void);
+
+/**
+ * @brief aCoral最终启动
+ * 
+ */
 void acoral_start_os(void);
-void acoral_sys_call(void);
-void acoral_app_call(void);
 #endif

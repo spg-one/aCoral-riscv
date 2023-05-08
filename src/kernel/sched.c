@@ -17,7 +17,6 @@
 #include "thread.h"
 #include "int.h"
 #include "lsched.h"
-#include "queue.h"
 #include "list.h"
 #include "bitops.h"
 #include <stdbool.h>
@@ -26,7 +25,7 @@ unsigned char acoral_need_sched; ///< aCoral是否需要调度标志，仅当aCo
 unsigned char sched_lock = 1;	 ///< aCoral初始化完成之前，调度都是被上锁的，即不允许调度。
 acoral_thread_t *acoral_cur_thread, *acoral_ready_thread;
 
-static acoral_rdy_queue_t acoral_ready_queues;
+acoral_rdy_queue_t acoral_ready_queues; ///<aCoral就绪队列
 /* 之前是static acoral_rdy_queue_t acoral_ready_queues[HAL_MAX_CPU],*/
 /*改成static acoral_rdy_queue_t* acoral_ready_queues 后，由于static存在，会把这个指针变量初始化为0，*/
 /*后面初始化就绪队列的操作就会修改0地址的异常向量表，导致时钟中断被打开后，无法正常进入中断服务*/
@@ -34,21 +33,21 @@ static acoral_rdy_queue_t acoral_ready_queues;
 
 void acoral_prio_queue_add(acoral_rdy_queue_t *array, unsigned char prio, acoral_list_t *list)
 {
-	acoral_queue_t *queue;
+	acoral_list_t *queue;
 	acoral_list_t *head;
 	array->num++;
 	queue = array->queue + prio;
-	head = &queue->head;
+	head = queue;
 	acoral_list_add2_tail(list, head);
 	acoral_set_bit(prio, array->bitmap);
 }
 
 void acoral_prio_queue_del(acoral_rdy_queue_t *array, unsigned char prio, acoral_list_t *list)
 {
-	acoral_queue_t *queue;
+	acoral_list_t *queue;
 	acoral_list_t *head;
 	queue = array->queue + prio;
-	head = &queue->head;
+	head = queue;
 	array->num--;
 	acoral_list_del(list);
 	if (acoral_list_empty(head))
@@ -63,7 +62,7 @@ unsigned int acoral_get_highprio(acoral_rdy_queue_t *array)
 void acoral_prio_queue_init(acoral_rdy_queue_t *array)
 {
 	unsigned char i;
-	acoral_queue_t *queue;
+	acoral_list_t *queue;
 	acoral_list_t *head;
 	array->num = 0;
 	for (i = 0; i < PRIO_BITMAP_SIZE; i++)
@@ -71,7 +70,7 @@ void acoral_prio_queue_init(acoral_rdy_queue_t *array)
 	for (i = 0; i < ACORAL_MAX_PRIO_NUM; i++)
 	{
 		queue = array->queue + i;
-		head = &queue->head;
+		head = queue;
 		acoral_init_list(head);
 	}
 }
@@ -82,10 +81,6 @@ void acoral_sched_init()
 	acoral_set_need_sched(false);
 }
 
-void acoral_set_orig_thread(acoral_thread_t *thread)
-{
-	acoral_cur_thread = thread;
-}
 
 void acoral_set_running_thread(acoral_thread_t *thread)
 {
@@ -225,12 +220,12 @@ void acoral_select_thread()
 	acoral_rdy_queue_t *rdy_queue;
 	acoral_list_t *head;
 	acoral_thread_t *thread;
-	acoral_queue_t *queue;
+	acoral_list_t *queue;
 	rdy_queue = &acoral_ready_queues;
 	/*找出就绪队列中优先级最高的线程的优先级*/
 	index = acoral_get_highprio(rdy_queue);
 	queue = rdy_queue->queue + index;
-	head = &queue->head;
+	head = queue;
 	thread = list_entry(head->next, acoral_thread_t, ready);
 	acoral_set_ready_thread(thread);
 }

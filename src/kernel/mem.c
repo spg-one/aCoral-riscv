@@ -18,38 +18,29 @@
 #include "autocfg.h"
 #include "hal.h"
 #include "mem.h"
-#include "queue.h"
 #include "core.h"
 #include "int.h"
 #include "list.h"
 #include <stdio.h>
 #include "bitops.h"
 
-extern int _heap_start; ///<堆内存起始地址，定义于链接脚本
-extern int _heap_end; ///<堆内存结束地址，定义于链接脚本
+extern int _heap_start; ///< 堆内存起始地址，定义于链接脚本
+extern int _heap_end;	///< 堆内存结束地址，定义于链接脚本
 
-/**
- * @brief 内存管理系统初始化
- * @note 初始化mmu;初始化两级内存管理系统，第一级为伙伴系统，第二级为任意大小内存分配系统（名字里带"2")和资源池系统
- */
 void acoral_mem_sys_init()
 {
-	acoral_mem_init((unsigned int)&_heap_start, (unsigned int)&_heap_end); //伙伴系统初始化
+	acoral_mem_init((unsigned int)&_heap_start, (unsigned int)&_heap_end); // 伙伴系统初始化
 #ifdef CFG_MEM2
-	acoral_mem_init2(); //任意大小内存分配系统初始化
+	acoral_mem_init2(); // 任意大小内存分配系统初始化
 #endif
-	acoral_res_sys_init(); //资源池系统初始化
+	acoral_res_sys_init(); // 资源池系统初始化
 }
 
 /*伙伴系统部分*/
 
-acoral_block_ctr_t *acoral_mem_ctrl; ///<内存控制块,只有一个
-acoral_block_t *acoral_mem_blocks; ///<这是一个数组，每个基本内存块对应一个
+acoral_block_ctr_t *acoral_mem_ctrl; ///< 内存控制块,只有一个
+acoral_block_t *acoral_mem_blocks;	 ///< 这是一个数组，每个基本内存块对应一个
 
-/**
- * @brief 伙伴系统扫描，查看是否有空闲块
- *
- */
 void buddy_scan()
 {
 	unsigned int i, k, n;
@@ -75,13 +66,6 @@ void buddy_scan()
 	printf("\r\n");
 }
 
-/**
- * @brief 伙伴系统初始化
- *
- * @param start_adr
- * @param end_adr
- * @return unsigned int
- */
 unsigned int buddy_init(unsigned int start_adr, unsigned int end_adr)
 {
 	int i, k;
@@ -94,14 +78,14 @@ unsigned int buddy_init(unsigned int start_adr, unsigned int end_adr)
 	unsigned int max_num, o_num;
 	unsigned int cur;
 	start_adr += 3;
-	start_adr &= ~(4 - 1); //首地址四字节对齐
-	end_adr &= ~(4 - 1);   //尾地址四字节对齐
+	start_adr &= ~(4 - 1); // 首地址四字节对齐
+	end_adr &= ~(4 - 1);   // 尾地址四字节对齐
 	resize_size = BASIC_BLOCK_SIZE;
-	end_adr = end_adr - sizeof(acoral_block_ctr_t);	 //减去内存控制块的大小，剩下的才是可分配内存
-	end_adr &= ~(4 - 1);							 //尾地址再进行一次四字节对齐
-	acoral_mem_ctrl = (acoral_block_ctr_t *)end_adr; //内存控制块的地址
+	end_adr = end_adr - sizeof(acoral_block_ctr_t);	 // 减去内存控制块的大小，剩下的才是可分配内存
+	end_adr &= ~(4 - 1);							 // 尾地址再进行一次四字节对齐
+	acoral_mem_ctrl = (acoral_block_ctr_t *)end_adr; // 内存控制块的地址
 
-	//如果内存这么少，不适合分配
+	// 如果内存这么少，不适合分配
 	if (start_adr > end_adr || end_adr - start_adr < BASIC_BLOCK_SIZE)
 	{
 		acoral_mem_ctrl->state = MEM_NO_ALLOC;
@@ -114,40 +98,40 @@ unsigned int buddy_init(unsigned int start_adr, unsigned int end_adr)
 		if (end_adr <= start_adr + resize_size)
 			break;
 		resize_size = resize_size << 1;
-		num = num << 1; //全分成基本内存块的数量
+		num = num << 1; // 全分成基本内存块的数量
 		adjust_level++;
 	}
 	acoral_mem_blocks = (acoral_block_t *)end_adr - num;
 	save_adr = (unsigned int)acoral_mem_blocks;
-	level = adjust_level; //实际层数
-	//如果层数较小，则最大层用一块构成，如果层数较多，限制层数范围，最大层由多块构成
+	level = adjust_level; // 实际层数
+	// 如果层数较小，则最大层用一块构成，如果层数较多，限制层数范围，最大层由多块构成
 	if (adjust_level > LEVEL)
 		level = LEVEL;
-	num = num / 32; //每32个基本内存块由一个32位位图表示
+	num = num / 32; // 每32个基本内存块由一个32位位图表示
 	for (i = 0; i < level - 1; i++)
 	{
-		num = num >> 1; //除去最大层，其他每层的32位图都是64个块构成，所以要除以2
+		num = num >> 1; // 除去最大层，其他每层的32位图都是64个块构成，所以要除以2
 		if (num == 0)
 		{
-			num = 1; //不足一个位图的，用一个位图表示
+			num = 1; // 不足一个位图的，用一个位图表示
 		}
 
-		save_adr -= num * 4;								 //每一个32位位图为4个字节
-		save_adr &= ~(4 - 1);								 //四字节对齐
-		acoral_mem_ctrl->bitmap[i] = (unsigned int *)save_adr; //当层bitmap地址
+		save_adr -= num * 4;								   // 每一个32位位图为4个字节
+		save_adr &= ~(4 - 1);								   // 四字节对齐
+		acoral_mem_ctrl->bitmap[i] = (unsigned int *)save_adr; // 当层bitmap地址
 		acoral_mem_ctrl->num[i] = num;
-		save_adr -= num * 4;								   //每一个32位位图为4个字节
-		save_adr &= ~(4 - 1);								   //四字节对齐
-		acoral_mem_ctrl->free_list[i] = (int *)save_adr; //当层free_list地址
+		save_adr -= num * 4;							 // 每一个32位位图为4个字节
+		save_adr &= ~(4 - 1);							 // 四字节对齐
+		acoral_mem_ctrl->free_list[i] = (int *)save_adr; // 当层free_list地址
 		for (k = 0; k < num; k++)
 		{
-			acoral_mem_ctrl->bitmap[i][k] = 0;	   //初始化当层bitmap
-			acoral_mem_ctrl->free_list[i][k] = -1; //初始化当层free_list
+			acoral_mem_ctrl->bitmap[i][k] = 0;	   // 初始化当层bitmap
+			acoral_mem_ctrl->free_list[i][k] = -1; // 初始化当层free_list
 		}
-		acoral_mem_ctrl->free_cur[i] = -1; //初始化当层free_cur
+		acoral_mem_ctrl->free_cur[i] = -1; // 初始化当层free_cur
 	}
 
-	//最大内存块层如果不足一个位图的，用一个位图表示
+	// 最大内存块层如果不足一个位图的，用一个位图表示
 	if (num == 0)
 	{
 		num = 1;
@@ -167,7 +151,7 @@ unsigned int buddy_init(unsigned int start_adr, unsigned int end_adr)
 	}
 	acoral_mem_ctrl->free_cur[i] = -1;
 
-	//如果剩余内存大小不够形成现在的level
+	// 如果剩余内存大小不够形成现在的level
 	if (save_adr <= (start_adr + (resize_size >> 1)))
 		adjust_level--;
 	if (adjust_level > LEVEL)
@@ -183,20 +167,20 @@ unsigned int buddy_init(unsigned int start_adr, unsigned int end_adr)
 	acoral_mem_ctrl->block_size = BASIC_BLOCK_SIZE;
 
 	i = 0;
-	max_num = (1 << level) - 1; //最大内存块层的每块内存大小
+	max_num = (1 << level) - 1; // 最大内存块层的每块内存大小
 	o_num = 0;
 
 	if (num > 0)
-	{ //有内存块，则最大内存块层的free_cur为0
+	{ // 有内存块，则最大内存块层的free_cur为0
 		acoral_mem_ctrl->free_cur[level - 1] = 0;
 	}
 	else
-	{ //无内存块，则最大内存块层的free_cur为-1
+	{ // 无内存块，则最大内存块层的free_cur为-1
 		acoral_mem_ctrl->free_cur[level - 1] = -1;
 	}
 
 	////整块内存优先分给最大内存块层
-	//计算当前可分配内存容量是否能直接形成一个最大内存块层的32位图
+	// 计算当前可分配内存容量是否能直接形成一个最大内存块层的32位图
 	while (num >= max_num * 32)
 	{
 		acoral_mem_ctrl->bitmap[level - 1][i] = -1;
@@ -207,11 +191,11 @@ unsigned int buddy_init(unsigned int start_adr, unsigned int end_adr)
 		i++;
 	}
 	if (num == 0)
-	{ //所有块正好分配到最大内存块层的32位图
+	{ // 所有块正好分配到最大内存块层的32位图
 		acoral_mem_ctrl->free_list[level - 1][i - 1] = -1;
 	}
 
-	//计算当前可分配内存是否还能形成最大内存块层的一块
+	// 计算当前可分配内存是否还能形成最大内存块层的一块
 	while (num >= max_num)
 	{
 		index = (o_num >> level) - 1;
@@ -221,14 +205,14 @@ unsigned int buddy_init(unsigned int start_adr, unsigned int end_adr)
 	}
 	acoral_mem_ctrl->free_list[level - 1][i] = -1;
 
-	//接下来的每层初始化
+	// 接下来的每层初始化
 	while (--level > 0)
 	{
 		index = o_num >> level;
 		if (num == 0)
 			break;
 		cur = index / 32;
-		max_num = (1 << level) - 1; //每层的内存块大小
+		max_num = (1 << level) - 1; // 每层的内存块大小
 		if (num >= max_num)
 		{
 			acoral_mem_blocks[BLOCK_INDEX(o_num)].level = -1;
@@ -253,42 +237,42 @@ static int recus_malloc(int level)
 	unsigned int index;
 	int cur;
 	int num;
-	if (level >= acoral_mem_ctrl->level) //层数超出范围
+	if (level >= acoral_mem_ctrl->level) // 层数超出范围
 		return -1;
-	cur = acoral_mem_ctrl->free_cur[level]; //获取首个空闲位图
-	if (cur < 0)							//无空闲
+	cur = acoral_mem_ctrl->free_cur[level]; // 获取首个空闲位图
+	if (cur < 0)							// 无空闲
 	{
-		num = recus_malloc(level + 1); //迭代向上寻找
+		num = recus_malloc(level + 1); // 迭代向上寻找
 		if (num < 0)
 			return -1;
-		index = num >> level + 1;							   //计算在位图中位置
-		cur = index / 32;									   //计算在位图链表中位置
-		acoral_set_bit(index, acoral_mem_ctrl->bitmap[level]); //在位图中置1，把偶数块分出去
-		//当前层无空闲，两个空闲块是从上层分配的，所以空闲位图链表更改，然后分配完一块还有一块，所以移动空闲位图链表头
+		index = num >> level + 1;							   // 计算在位图中位置
+		cur = index / 32;									   // 计算在位图链表中位置
+		acoral_set_bit(index, acoral_mem_ctrl->bitmap[level]); // 在位图中置1，把偶数块分出去
+		// 当前层无空闲，两个空闲块是从上层分配的，所以空闲位图链表更改，然后分配完一块还有一块，所以移动空闲位图链表头
 		acoral_mem_ctrl->free_list[level][cur] = -1;
 		acoral_mem_ctrl->free_cur[level] = cur;
 		return num;
 	}
-	index = acoral_ffs(acoral_mem_ctrl->bitmap[level][cur]); //获取空闲块在其32位图中的位置
-	index = cur * 32 + index;								 //计算空闲块实际位置
-	acoral_clear_bit(index, acoral_mem_ctrl->bitmap[level]); //从只有一块空闲变成两块都不空闲了，所以清0
-	if (acoral_mem_ctrl->bitmap[level][cur] == 0)			 //如果此位图无空闲块了
+	index = acoral_ffs(acoral_mem_ctrl->bitmap[level][cur]); // 获取空闲块在其32位图中的位置
+	index = cur * 32 + index;								 // 计算空闲块实际位置
+	acoral_clear_bit(index, acoral_mem_ctrl->bitmap[level]); // 从只有一块空闲变成两块都不空闲了，所以清0
+	if (acoral_mem_ctrl->bitmap[level][cur] == 0)			 // 如果此位图无空闲块了
 	{
-		acoral_mem_ctrl->free_cur[level] = acoral_mem_ctrl->free_list[level][cur]; //移动空闲位图链表头
+		acoral_mem_ctrl->free_cur[level] = acoral_mem_ctrl->free_list[level][cur]; // 移动空闲位图链表头
 	}
-	num = index << level + 1; //计算空闲块首个num
+	num = index << level + 1; // 计算空闲块首个num
 	/*最高level情况*/
-	if (level == acoral_mem_ctrl->level - 1) //最大内存块层
+	if (level == acoral_mem_ctrl->level - 1) // 最大内存块层
 	{
 		if ((num >> 1) + (1 << level) > acoral_mem_ctrl->block_num)
 			return -1;
 		return num >> 1;
 	}
-	//其余层
-	if (acoral_mem_blocks[BLOCK_INDEX(num)].level >= 0) //检查这块内存有没有被分配
+	// 其余层
+	if (acoral_mem_blocks[BLOCK_INDEX(num)].level >= 0) // 检查这块内存有没有被分配
 	{
 		return num + (1 << level);
-	} //如果此块已经被分配，那就是后面一块为空闲块
+	} // 如果此块已经被分配，那就是后面一块为空闲块
 	else
 	{
 		return num;
@@ -306,7 +290,7 @@ static void *r_malloc(unsigned char level)
 	unsigned int index;
 	int num, cur;
 	acoral_enter_critical();
-	acoral_mem_ctrl->free_num -= 1 << level; //提前减去即将分配的基本内存块数
+	acoral_mem_ctrl->free_num -= 1 << level; // 提前减去即将分配的基本内存块数
 	cur = acoral_mem_ctrl->free_cur[level];
 	if (cur < 0)
 	{
@@ -360,12 +344,6 @@ static void *r_malloc(unsigned char level)
 	return (void *)(acoral_mem_ctrl->start_adr + (num << BLOCK_SHIFT));
 }
 
-/**
- * @brief 用户指定的内存大小不一定合适，可以先用这个函数进行一下调整
- *
- * @param size 用户想使用内存的大小
- * @return unsigned int 实际将要分配的内存大小
- */
 unsigned int buddy_malloc_size(unsigned int size)
 {
 	unsigned int resize_size;
@@ -383,12 +361,6 @@ unsigned int buddy_malloc_size(unsigned int size)
 	return resize_size;
 }
 
-/**
- * @brief 伙伴系统分配内存
- *
- * @param size 用户需要的大小
- * @return void* 返回分配的地址
- */
 void *buddy_malloc(unsigned int size)
 {
 	unsigned int resize_size;
@@ -397,24 +369,19 @@ void *buddy_malloc(unsigned int size)
 	resize_size = BASIC_BLOCK_SIZE;
 	if (acoral_mem_ctrl->state == MEM_NO_ALLOC)
 		return NULL;
-	while (resize_size < size) //本层块大小不满足申请内存
+	while (resize_size < size) // 本层块大小不满足申请内存
 	{
 		num = num << 1;
 		level++;
 		resize_size = resize_size << 1;
 	}
-	if (num > acoral_mem_ctrl->free_num) //剩余内存不足
+	if (num > acoral_mem_ctrl->free_num) // 剩余内存不足
 		return NULL;
-	if (level >= acoral_mem_ctrl->level) //申请内存块大小超过顶层内存块大小
+	if (level >= acoral_mem_ctrl->level) // 申请内存块大小超过顶层内存块大小
 		return NULL;
-	return r_malloc(level); //实际的分配函数
+	return r_malloc(level); // 实际的分配函数
 }
 
-/**
- * @brief 伙伴系统回收内存
- *
- * @param ptr 要回收的地址
- */
 void buddy_free(void *ptr)
 {
 	unsigned char level;
@@ -430,29 +397,29 @@ void buddy_free(void *ptr)
 		return;
 	}
 
-	//无效地址
+	// 无效地址
 	if (ptr == NULL || adr < acoral_mem_ctrl->start_adr || adr + BASIC_BLOCK_SIZE > acoral_mem_ctrl->end_adr)
 	{
 		printf("Invalid Free Address:0x%x\n", (unsigned int)ptr);
 		return;
 	}
-	max_level = acoral_mem_ctrl->level;						 //记下层数
-	num = (adr - acoral_mem_ctrl->start_adr) >> BLOCK_SHIFT; //地址与基本块数换算
-	//如果不是block整数倍，肯定是非法地址
+	max_level = acoral_mem_ctrl->level;						 // 记下层数
+	num = (adr - acoral_mem_ctrl->start_adr) >> BLOCK_SHIFT; // 地址与基本块数换算
+	// 如果不是block整数倍，肯定是非法地址
 	if (adr != acoral_mem_ctrl->start_adr + (num << BLOCK_SHIFT))
 	{
 		printf("Invalid Free Address:0x%x\n", (unsigned int)ptr);
 		return;
 	}
 	acoral_enter_critical();
-	if (num & 0x1) //奇数基本内存块
+	if (num & 0x1) // 奇数基本内存块
 	{
-		level = 0; //奇数基本内存块一定是从0层分配
-		//下面是地址检查
+		level = 0; // 奇数基本内存块一定是从0层分配
+		// 下面是地址检查
 		index = num >> 1;
 		buddy_level = acoral_mem_blocks[BLOCK_INDEX(num)].level;
 
-		//不是从0层，直接返回错误
+		// 不是从0层，直接返回错误
 		if (buddy_level > 0)
 		{
 			printf("Invalid Free Address:0x%x\n", (unsigned int)ptr);
@@ -484,24 +451,24 @@ void buddy_free(void *ptr)
 			acoral_exit_critical();
 			return;
 		}
-		acoral_mem_ctrl->free_num += 1 << level;		//空闲基本块数增加
-		acoral_mem_blocks[BLOCK_INDEX(num)].level = -1; //标志此基本块未被分配
+		acoral_mem_ctrl->free_num += 1 << level;		// 空闲基本块数增加
+		acoral_mem_blocks[BLOCK_INDEX(num)].level = -1; // 标志此基本块未被分配
 	}
-	if (level == max_level - 1) //最大内存块直接回收
+	if (level == max_level - 1) // 最大内存块直接回收
 	{
-		index = num >> level;								   //最大内存块层，一块一位
-		acoral_set_bit(index, acoral_mem_ctrl->bitmap[level]); //标志空闲
+		index = num >> level;								   // 最大内存块层，一块一位
+		acoral_set_bit(index, acoral_mem_ctrl->bitmap[level]); // 标志空闲
 		acoral_exit_critical();
 		return;
 	}
-	index = (num >> 1) + level; //其余层，两块一位
-	while (level < max_level) //其余层回收，有可能回收到最大层
+	index = (num >> 1) + level; // 其余层，两块一位
+	while (level < max_level)	// 其余层回收，有可能回收到最大层
 	{
 		cur = index / 32;
-		if (!acoral_get_bit(index, acoral_mem_ctrl->bitmap[level])) //两块都没空闲
+		if (!acoral_get_bit(index, acoral_mem_ctrl->bitmap[level])) // 两块都没空闲
 		{
-			acoral_set_bit(index, acoral_mem_ctrl->bitmap[level]);								//设置成有一块空闲
-			if (acoral_mem_ctrl->free_cur[level] < 0 || cur < acoral_mem_ctrl->free_cur[level]) //无空闲块或者释放的位比空闲位图链表头小
+			acoral_set_bit(index, acoral_mem_ctrl->bitmap[level]);								// 设置成有一块空闲
+			if (acoral_mem_ctrl->free_cur[level] < 0 || cur < acoral_mem_ctrl->free_cur[level]) // 无空闲块或者释放的位比空闲位图链表头小
 			{
 				acoral_mem_ctrl->free_list[level][cur] = acoral_mem_ctrl->free_cur[level];
 				acoral_mem_ctrl->free_cur[level] = cur;
@@ -530,13 +497,6 @@ acoral_pool_t acoral_pools[ACORAL_MAX_POOLS];
 /// aCoral空闲资源池指针
 acoral_pool_t *acoral_free_res_pool;
 
-/**
- * @brief 创建一个某一类型的资源池
- * @note 创建的时机包括系统刚初始化时，以及系统中空闲资源池不够时
- *
- * @param pool_ctrl 某一类型资源池的控制块
- * @return unsigned int
- */
 unsigned int acoral_create_pool(acoral_pool_ctrl_t *pool_ctrl)
 {
 	acoral_pool_t *pool;
@@ -561,11 +521,6 @@ unsigned int acoral_create_pool(acoral_pool_ctrl_t *pool_ctrl)
 	return 0;
 }
 
-/**
- * @brief 释放所有某一类型的资源池
- *
- * @param pool_ctrl 某一类型的资源池控制块
- */
 void acoral_release_pool(acoral_pool_ctrl_t *pool_ctrl)
 {
 	acoral_pool_t *pool;
@@ -585,18 +540,6 @@ void acoral_release_pool(acoral_pool_ctrl_t *pool_ctrl)
 	}
 }
 
-/**
- * @brief
- *
- * @param pool_ctrl
- */
-
-/**
- * @brief 获取某一类型的资源
- *
- * @param pool_ctrl 某一类型的资源池控制块
- * @return acoral_res_t*
- */
 acoral_res_t *acoral_get_res(acoral_pool_ctrl_t *pool_ctrl)
 {
 	acoral_list_t *first;
@@ -629,11 +572,6 @@ acoral_res_t *acoral_get_res(acoral_pool_ctrl_t *pool_ctrl)
 	return res;
 }
 
-/**
- * @brief 释放某一资源
- *
- * @param res 将要释放的资源
- */
 void acoral_release_res(acoral_res_t *res)
 {
 	acoral_pool_t *pool;
@@ -647,7 +585,7 @@ void acoral_release_res(acoral_res_t *res)
 	pool = acoral_get_pool_by_id(res->id);
 	if (pool == NULL)
 	{
-		printf("Res release Err\n"); //TODO 删printerr
+		printf("Res release Err\n"); // TODO 删printerr
 		return;
 	}
 	pool_ctrl = pool->ctrl;
@@ -672,12 +610,6 @@ void acoral_release_res(acoral_res_t *res)
 	return;
 }
 
-/**
- * @brief 根据资源ID获取某一资源对应的资源池
- *
- * @param res_id 资源ID
- * @return acoral_pool_t* 获取到的资源池指针
- */
 acoral_pool_t *acoral_get_pool_by_id(int res_id)
 {
 	unsigned int index;
@@ -687,11 +619,6 @@ acoral_pool_t *acoral_get_pool_by_id(int res_id)
 	return NULL;
 }
 
-/**
- * @brief 获取空闲资源池
- *
- * @return acoral_pool_t* 获取到的空闲资源池指针
- */
 acoral_pool_t *acoral_get_free_pool()
 {
 	acoral_pool_t *tmp;
@@ -705,12 +632,6 @@ acoral_pool_t *acoral_get_free_pool()
 	return tmp;
 }
 
-/**
- * @brief 根据id获取某一资源
- *
- * @param id 资源id
- * @return acoral_res_t* 获取到的资源
- */
 acoral_res_t *acoral_get_res_by_id(int id)
 {
 	acoral_pool_t *pool;
@@ -722,11 +643,6 @@ acoral_res_t *acoral_get_res_by_id(int id)
 	return (acoral_res_t *)((unsigned char *)pool->base_adr + index * pool->size);
 }
 
-/**
- * @brief 与一个资源池中的资源初始化
- *
- * @param pool 指定的资源池
- */
 void acoral_pool_res_init(acoral_pool_t *pool)
 {
 	acoral_res_t *res;
@@ -747,11 +663,6 @@ void acoral_pool_res_init(acoral_pool_t *pool)
 	res->next_id = 0;
 }
 
-/**
- * @brief 利用资源池控制块对某种类型的资源池进行初始化
- * @note 调用时机为系统启动后，每个子系统（驱动、事件、内存、线程）初始化的时候
- * @param pool_ctrl 每种资源池控制块
- */
 void acoral_pool_ctrl_init(acoral_pool_ctrl_t *pool_ctrl)
 {
 	unsigned int size;
@@ -769,16 +680,10 @@ void acoral_pool_ctrl_init(acoral_pool_ctrl_t *pool_ctrl)
 	else
 	{
 		pool_ctrl->num_per_pool = size / pool_ctrl->size;
-		acoral_create_pool(pool_ctrl); //先创建一个资源池，后面如果一个池子不够了，那在不超过这类资源的max_pool的条件下再创建新的池子
+		acoral_create_pool(pool_ctrl); // 先创建一个资源池，后面如果一个池子不够了，那在不超过这类资源的max_pool的条件下再创建新的池子
 	}
 }
 
-/**
- * @brief 资源系统初始化
- * @note link all pools by making every pool's base_adr point to next pool,\
- * 		and then initialize acoral_free_res_pool as the first pool.
- *
- */
 void acoral_res_sys_init()
 {
 	acoral_pool_t *pool;

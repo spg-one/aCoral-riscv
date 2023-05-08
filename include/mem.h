@@ -16,15 +16,43 @@
 #ifndef ACORAL_MEM_H
 #define ACORAL_MEM_H
 #include "autocfg.h"
-
 #include "hal.h"
+#include "core.h"
+#include "list.h"
 
 /**
  * 伙伴系统部分
 */
+
+/**
+ * @brief 伙伴系统初始化
+ *
+ * @param start_adr
+ * @param end_adr
+ * @return unsigned int
+ */
 unsigned int buddy_init(unsigned int start, unsigned int end);
+
+/**
+ * @brief 伙伴系统分配内存
+ *
+ * @param size 用户需要的大小
+ * @return void* 返回分配的地址
+ */
 void* buddy_malloc(unsigned int  size);
+
+
+/**
+ * @brief 伙伴系统回收内存
+ *
+ * @param ptr 要回收的地址
+ */
 void buddy_free(void *p);
+
+/**
+ * @brief 伙伴系统扫描，查看是否有空闲块
+ *
+ */
 void buddy_scan(void);
 
 #define acoral_malloc(size) buddy_malloc(size)
@@ -33,9 +61,23 @@ void buddy_scan(void);
 #define acoral_mem_init(start,end) buddy_init(start,end)
 #define acoral_mem_scan() buddy_scan()
 
-#ifdef CFG_MEM2
+#ifdef CFG_MEM2 
+/**
+ * @brief 任意大小内存分配
+ * 
+ */
    void * v_malloc(int size);
+
+/**
+ * @brief 任意大小内存释放
+ * 
+ */
    void v_free(void * p);
+
+/**
+ * @brief 任意大小内存分配系统初始化。从伙伴系统中拿出一部分内存，用作任意大小分配的内存
+ * 
+ */
    void v_mem_init(void);
    void v_mem_scan(void);
    #define acoral_mem_init2() v_mem_init()
@@ -44,10 +86,26 @@ void buddy_scan(void);
    #define acoral_mem_scan2() v_mem_scan()
 #endif
 
-#define LEVEL 14  ///<最大层数
-#define BLOCK_INDEX(index) ((index)>>1) ///<bitmap的index换算，因为除去最大内存块的剩余层中64块用一个32位图表示，所以要除以2
-#define BLOCK_SHIFT 7 ///<基本内存块偏移量
+#define LEVEL 14                          ///<最大层数
+#define BLOCK_INDEX(index) ((index)>>1)   ///<bitmap的index换算，因为除去最大内存块的剩余层中64块用一个32位图表示，所以要除以2
+#define BLOCK_SHIFT 7                     ///<基本内存块偏移量
 #define BASIC_BLOCK_SIZE (1<<BLOCK_SHIFT) ///<基本内存块大小 128B
+
+#define MAGIC 0xcc
+#define MAGIC_MASK 0xfe
+#define USED 1
+#define FREE 0 
+#define USETAG_MASK 0x1
+#define SIZE_MASK 0xffffff00
+#define SIZE_BIT 8
+#define BLOCK_CHECK(value) (((value&MAGIC_MASK)==MAGIC))
+#define BLOCK_SIZE(value) ((value&SIZE_MASK)>>SIZE_BIT)
+#define BLOCK_TAG(value) (value&USETAG_MASK)
+#define BLOCK_FREE(value) (BLOCK_TAG(value)==FREE)
+#define BLOCK_USED(value) (BLOCK_TAG(value)==USED)
+#define BLOCK_SET_USED(ptr,size) (*ptr=(size<<SIZE_BIT)|0x1|MAGIC)
+#define BLOCK_SET_FREE(ptr,size) (*ptr=(size<<SIZE_BIT)|MAGIC)
+#define BLOCK_CLEAR(ptr) (*ptr=0)
 
 enum acoralMemAllocStateEnum{
    MEM_NO_ALLOC,  ///<内存系统状态定义：容量太小不可分配
@@ -86,8 +144,7 @@ typedef struct{
  * 资源系统部分
 */
 
-#include "core.h"
-#include "list.h"
+
 #define ACORAL_MAX_POOLS 40
 
 enum acoralResourceTypeEnum{
@@ -167,18 +224,99 @@ typedef struct {
    acoral_list_t free_list;
 }acoral_pool_t;
 
+/**
+ * @brief 内存管理系统初始化
+ * @note 初始化两级内存管理系统，第一级为伙伴系统，第二级为任意大小内存分配系统（名字里带"2")和资源池系统
+ */
 void acoral_mem_sys_init();
+
+
+/**
+ * @brief 用户指定的内存大小不一定合适，可以先用这个函数进行一下调整
+ *
+ * @param size 用户想使用内存的大小
+ * @return unsigned int 实际将要分配的内存大小
+ */
 unsigned int buddy_malloc_size(unsigned int size);
+
+/**
+ * @brief 根据资源ID获取某一资源对应的资源池
+ *
+ * @param res_id 资源ID
+ * @return acoral_pool_t* 获取到的资源池指针
+ */
 acoral_pool_t *acoral_get_pool_by_id(int id);
+
+/**
+ * @brief 获取空闲资源池
+ *
+ * @return acoral_pool_t* 获取到的空闲资源池指针
+ */
 acoral_pool_t *acoral_get_free_pool(void);
+
+
+/**
+ * @brief 创建一个某一类型的资源池
+ * @note 创建的时机包括系统刚初始化时，以及系统中空闲资源池不够时
+ *
+ * @param pool_ctrl 某一类型资源池的控制块
+ * @return unsigned int
+ */
 unsigned int acoral_create_pool(acoral_pool_ctrl_t *pool_ctrl);
 void acoral_pool_res_init(acoral_pool_t *pool);
+
+
+/**
+ * @brief 释放所有某一类型的资源池
+ *
+ * @param pool_ctrl 某一类型的资源池控制块
+ */
 void acoral_release_pool(acoral_pool_ctrl_t *pool_ctrl);
+
+
+/**
+ * @brief 获取某一类型的资源
+ *
+ * @param pool_ctrl 某一类型的资源池控制块
+ * @return acoral_res_t*
+ */
 acoral_res_t *acoral_get_res(acoral_pool_ctrl_t *pool_ctrl);
+
+/**
+ * @brief 释放某一资源
+ *
+ * @param res 将要释放的资源
+ */
 void acoral_release_res(acoral_res_t *res);
+
+/**
+ * @brief 根据id获取某一资源
+ *
+ * @param id 资源id
+ * @return acoral_res_t* 获取到的资源
+ */
 acoral_res_t * acoral_get_res_by_id(int id);
+
+/**
+ * @brief 与一个资源池中的资源初始化
+ *
+ * @param pool 指定的资源池
+ */
 void acoral_pool_res_init(acoral_pool_t * pool);
+
+/**
+ * @brief 资源系统初始化
+ * @note link all pools by making every pool's base_adr point to next pool,\
+ * 		and then initialize acoral_free_res_pool as the first pool.
+ *
+ */
 void acoral_res_sys_init(void);
+
+/**
+ * @brief 利用资源池控制块对某种类型的资源池进行初始化
+ * @note 调用时机为系统启动后，每个子系统（驱动、事件、内存、线程）初始化的时候
+ * @param pool_ctrl 每种资源池控制块
+ */
 void acoral_pool_ctrl_init(acoral_pool_ctrl_t *pool_ctrl);
 
 #endif

@@ -17,16 +17,12 @@
 #ifndef ACORAL_THREAD_H
 #define ACORAL_THREAD_H
 #include "autocfg.h"
-
 #include "list.h"
 #include "mem.h"
-#include "queue.h"
 #include "event.h"
 
-///41。总共有40个线程，就有0~40共41个优先级
-#define ACORAL_MAX_PRIO_NUM ((CFG_MAX_THREAD + 1) & 0xff)
-///aCoral最低优先级40
-#define ACORAL_MINI_PRIO CFG_MAX_THREAD
+#define ACORAL_MAX_PRIO_NUM ((CFG_MAX_THREAD + 1) & 0xff) ///<41。总共有40个线程，就有0~40共41个优先级
+#define ACORAL_MINI_PRIO CFG_MAX_THREAD ///<aCoral最低优先级40
 
 enum acoralPrioEnum{
 	ACORAL_INIT_PRIO,	///<init线程独有的0优先级
@@ -37,7 +33,7 @@ enum acoralPrioEnum{
 
 	ACORAL_DAEMON_PRIO = ACORAL_MINI_PRIO-2,	///<daemon回收线程专用优先级
 	ACORAL_NONHARD_RT_PRIO_MIN,	///<非硬实时任务最低优先级
-	ACORAL_IDLE_PRIO	///<idle线程专用优先级，也是系统最低优先级
+	ACORAL_IDLE_PRIO	///<idle线程专用优先级，也是系统最低优先级ACORAL_MINI_PRIO
 };
 
 enum acoralPrioTypeEnum{
@@ -82,6 +78,18 @@ typedef struct{
 	void*	data;
 }acoral_thread_t;
 
+/**
+ * @brief 创建一个线程
+ * 
+ * @param route 线程函数
+ * @param stack_size 线程栈大小
+ * @param args 线程函数参数
+ * @param name 线程名字
+ * @param stack 线程栈指针
+ * @param sched_policy 线程调度策略
+ * @param data 线程策略数据
+ * @return int 返回线程id
+ */
 int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,void *stack,unsigned int sched_policy,void *data);
 void acoral_release_thread(acoral_res_t *thread);
 void acoral_suspend_self(void);
@@ -104,7 +112,7 @@ void acoral_unrdy_thread(acoral_thread_t *thread);
 void acoral_rdy_thread(acoral_thread_t *thread);
 void acoral_thread_move2_tail_by_id(int thread_id);
 void acoral_thread_move2_tail(acoral_thread_t *thread);
-extern acoral_queue_t acoral_threads_queue;
+extern acoral_list_t acoral_threads_queue;
 void acoral_thread_change_prio(acoral_thread_t* thread, unsigned int prio);
 void acoral_change_prio_self(unsigned int prio);
 #endif

@@ -30,5 +30,6 @@
 #include "comm_thrd.h"
 #include "period_thrd.h"
 #include "shell.h"
+#include "message.h"
 
 #endif /* KERNEL_H_ */

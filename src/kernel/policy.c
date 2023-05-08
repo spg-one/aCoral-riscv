@@ -1,6 +1,18 @@
-
+/**
+ * @file policy.c
+ * @author 王彬浩 (SPGGOGOGO@outlook.com)
+ * @brief kernel层，调度策略
+ * @version 1.0
+ * @date 2023-05-08
+ * @copyright Copyright (c) 2023
+ * @revisionHistory
+ *  <table>
+ *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
+ *   <tr><td> 0.1 <td>jivin <td> 2010-03-08 <td>Created
+ *   <tr><td> 1.0 <td>王彬浩 <td> 2023-05-08 <td>Standardized
+ *  </table>
+ */
 #include "hal.h"
-#include "queue.h"
 #include "thread.h"
 #include "policy.h"
 #include "int.h"
@@ -8,12 +20,12 @@
 #include "comm_thrd.h"
 #include "period_thrd.h"
 
-acoral_queue_t policy_list;
+acoral_list_t policy_list;
 
 acoral_sched_policy_t *acoral_get_policy_ctrl(unsigned char type){
 	acoral_list_t   *tmp,*head;
 	acoral_sched_policy_t  *policy_ctrl;
-	head=&policy_list.head;
+	head=&policy_list;
 	tmp=head;
 	for(tmp=head->next;tmp!=head;tmp=tmp->next){
 		policy_ctrl=list_entry(tmp,acoral_sched_policy_t,list);
@@ -37,13 +49,13 @@ int acoral_policy_thread_init(unsigned int policy,acoral_thread_t *thread,void (
 }
 
 void acoral_register_sched_policy(acoral_sched_policy_t *policy){
-	acoral_list_add2_tail(&policy->list,&policy_list.head);
+	acoral_list_add2_tail(&policy->list,&policy_list);
 }
 
 void acoral_policy_delay_deal(){
 	acoral_list_t   *tmp,*head;
 	acoral_sched_policy_t  *policy_ctrl;
-	head=&policy_list.head;
+	head=&policy_list;
 	tmp=head;
 	for(tmp=head->next;tmp!=head;tmp=tmp->next){
 		policy_ctrl=list_entry(tmp,acoral_sched_policy_t,list);
@@ -61,7 +73,7 @@ void acoral_policy_thread_release(acoral_thread_t *thread){
 
 
 void acoral_sched_policy_init(){
-	acoral_init_list(&policy_list.head);
+	acoral_init_list(&policy_list);
 	comm_policy_init();
 
 #ifdef CFG_THRD_PERIOD

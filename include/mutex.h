@@ -37,7 +37,14 @@ enum acoralMutexRetVal{
     MUTEX_ERR_RDY
 };
 
-unsigned int acoral_mutex_init(acoral_evt_t *, unsigned char);
+/**
+ * @brief  信号量初始化函数
+ * 
+ * @param evt 
+ * @param prio 
+ * @return unsigned int 
+ */
+unsigned int acoral_mutex_init(acoral_evt_t *evt, unsigned char prio);
 acoral_evt_t *acoral_mutex_create(unsigned char, unsigned int *);
 unsigned int acoral_mutex_del(acoral_evt_t *, unsigned int);
 unsigned int acoral_mutex_pend(acoral_evt_t *, unsigned int);

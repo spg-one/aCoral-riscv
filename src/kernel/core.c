@@ -7,11 +7,11 @@
  * @version 1.0
  * @date 2022-06-24
  * @copyright Copyright (c) 2023
- * @revisionHistory 
- *  <table> 
- *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
- *   <tr><td> 0.1 <td>jivin <td>2010-03-08 <td>Created 
- *   <tr><td> 1.0 <td>王彬浩 <td> 2022-06-24 <td>Standardized 
+ * @revisionHistory
+ *  <table>
+ *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
+ *   <tr><td> 0.1 <td>jivin <td>2010-03-08 <td>Created
+ *   <tr><td> 1.0 <td>王彬浩 <td> 2022-06-24 <td>Standardized
  *  </table>
  */
 
@@ -22,11 +22,11 @@
  * @version 1.0
  * @date 2022-07-04
  * @copyright Copyright (c) 2023
- * @revisionHistory 
- *  <table> 
- *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
- *   <tr><td> 0.1 <td>jivin <td>2010-03-08 <td>Created 
- *   <tr><td> 1.0 <td>王彬浩 <td> 2022-07-04 <td>Standardized 
+ * @revisionHistory
+ *  <table>
+ *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
+ *   <tr><td> 0.1 <td>jivin <td>2010-03-08 <td>Created
+ *   <tr><td> 1.0 <td>王彬浩 <td> 2022-07-04 <td>Standardized
  *  </table>
  */
 
@@ -36,30 +36,22 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-acoral_queue_t acoral_res_release_queue;
+acoral_list_t acoral_res_release_queue; ///< 将被daem线程回收的线程队列
 volatile unsigned int acoral_start_sched = false;
 int daemon_id, idle_id, init_id;
 
-/**
- * @brief aCoral空闲守护线程idle函数
- *
- * @param args
- */
 void idle(void *args)
 {
-	for(;;){}
+	for (;;)
+	{
+	}
 }
 
-/**
- * @brief aCoral资源回收线程daem函数
- *
- * @param args
- */
 void daem(void *args)
 {
 	acoral_thread_t *thread;
 	acoral_list_t *head, *tmp, *tmp1;
-	head = &acoral_res_release_queue.head;
+	head = &acoral_res_release_queue;
 	while (1)
 	{
 		for (tmp = head->next; tmp != head;)
@@ -68,9 +60,7 @@ void daem(void *args)
 			acoral_enter_critical();
 			thread = list_entry(tmp, acoral_thread_t, waiting);
 			/*如果线程资源已经不在使用，即release状态则释放*/
-
-			acoral_list_del(tmp); /**/
-
+			acoral_list_del(tmp);
 			acoral_exit_critical();
 			tmp = tmp1;
 			if (thread->state == ACORAL_THREAD_STATE_RELEASE)
@@ -89,16 +79,6 @@ void daem(void *args)
 	}
 }
 
-
-#define DAEM_STACK_SIZE 256
-
-acoral_thread_t *thread;
-
-/**
- * @brief aCoral初始化线程init函数
- *
- * @param args
- */
 void init(void *args)
 {
 	printf("in init spg\n");
@@ -108,11 +88,10 @@ void init(void *args)
 	acoral_start_sched = true;
 
 	/*创建后台服务进程*/
-	acoral_init_list(&acoral_res_release_queue.head);
+	acoral_init_list(&acoral_res_release_queue);
 	data.prio = ACORAL_DAEMON_PRIO;
 	data.prio_type = ACORAL_HARD_PRIO;
 	daemon_id = acoral_create_thread(daem, DAEM_STACK_SIZE, NULL, "daemon", NULL, ACORAL_SCHED_POLICY_COMM, &data);
-	thread = (acoral_thread_t *)acoral_get_res_by_id(daemon_id);
 	if (daemon_id == -1)
 		while (1)
 			;
@@ -123,16 +102,9 @@ void init(void *args)
 	printf("init done\n");
 }
 
-acoral_thread_t orig_thread;
-
-/**
- * @brief  c语言初始化入口函数
- * 
- */
 void acoral_start()
 {
 	printf("in acoral_start\n");
-	acoral_set_orig_thread(&orig_thread);
 	printf("before module init\n");
 	/*内核模块初始化*/
 	acoral_module_init();
@@ -141,12 +113,6 @@ void acoral_start()
 	acoral_core_cpu_start();
 }
 
-
-/**
- * @brief CPU开始创建线程工作，创建idle线程、init线程
- * 
- */
-#define IDLE_STACK_SIZE 128
 void acoral_core_cpu_start()
 {
 	acoral_comm_policy_data_t data;
@@ -157,7 +123,9 @@ void acoral_core_cpu_start()
 	idle_id = acoral_create_thread(idle, IDLE_STACK_SIZE, NULL, "idle", NULL, ACORAL_SCHED_POLICY_COMM, &data);
 	if (idle_id == -1)
 	{
-		while(1){}
+		while (1)
+		{
+		}
 	}
 	/*创建初始化线程,这个调用层次比较多，需要多谢堆栈*/
 	data.prio = ACORAL_INIT_PRIO;
@@ -165,30 +133,21 @@ void acoral_core_cpu_start()
 	init_id = acoral_create_thread(init, 512, "in init", "init", NULL, ACORAL_SCHED_POLICY_COMM, &data);
 	if (init_id == -1)
 	{
-		while (1){}
+		while (1)
+		{
+		}
 	}
-		
-	
 	acoral_start_os();
 }
-
-/**
- * @brief aCoral最终启动
- * 
- */
 
 void acoral_start_os()
 {
 	acoral_sched_init();
 	acoral_select_thread();
-	acoral_set_running_thread(acoral_ready_thread);//SPG空指针
+	acoral_set_running_thread(acoral_ready_thread); // SPG空指针
 	HAL_SWITCH_TO(&acoral_cur_thread->stack);
 }
 
-/**
- * @brief aCoral内核各模块初始化
- * 
- */
 void acoral_module_init()
 {
 	/*中断系统初始化*/
@@ -212,6 +171,6 @@ void acoral_module_init()
 	printf("evt_sys_init done\n");
 #ifdef CFG_DRIVER
 	/*驱动管理系统初始化*/
-	//acoral_drv_sys_init();
+	// acoral_drv_sys_init();
 #endif
 }

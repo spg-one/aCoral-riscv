@@ -22,7 +22,6 @@
 #ifndef ACORAL_MESSAGE_H
 #define ACORAL_MESSAGE_H
 
-#include "queue.h"
 #include "list.h"
 #include "mem.h"
 #include "event.h"
@@ -39,9 +38,9 @@
 typedef struct
 {
 	acoral_res_t res; 			///<消息容器也是资源
-	char *name;				///<消息容器名字
+	char *name;					///<消息容器名字
 	acoral_list_t msgctr_list; 	///<全局消息列表
-	unsigned int count; 			///<消息数量
+	unsigned int count; 		///<消息数量
 	unsigned int wait_thread_num; ///<等待线程数
 	acoral_list_t waiting; 		///<等待线程指针链
 	acoral_list_t msglist; 		///<消息链指针，用于挂载消息
@@ -55,8 +54,8 @@ typedef struct
 {
 	acoral_res_t res; 		///<消息也是一种资源
 	acoral_list_t msglist; 	///<消息链指针，用于挂载到消息容器
-	unsigned int id; 			///<消息标识	
-	unsigned int n; 			///<消息被接收次数，每被接收一次减一,直到0为止	
+	unsigned int id; 		///<消息标识	
+	unsigned int n; 		///<消息被接收次数，每被接收一次减一,直到0为止	
 	unsigned int ttl; 		///<消息最大生命周期  ticks计数
 	void *data; 			///<消息指针
 } acoral_msg_t;

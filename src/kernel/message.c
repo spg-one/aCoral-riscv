@@ -1,3 +1,18 @@
+/**
+ * @file message.c
+ * @author 王彬浩 (SPGGOGOGO@outlook.com)
+ * @brief kernel层，消息机制
+ * @version 1.0
+ * @date 2023-05-08
+ * @copyright Copyright (c) 2023
+ * @revisionHistory
+ *  <table>
+ *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
+ *   <tr><td> 0.1 <td>jivin <td> 2010-03-08 <td>Created
+ *   <tr><td> 1.0 <td>王彬浩 <td> 2023-05-08 <td>Standardized
+ *  </table>
+ */
+
 
 #include "event.h"
 #include "hal.h"
@@ -11,7 +26,7 @@
 
 acoral_pool_ctrl_t acoral_msgctr_pool_ctrl;
 acoral_pool_ctrl_t acoral_msg_pool_ctrl;
-acoral_queue_t g_msgctr_header; ///<全局-用来串系统中所有的acoral_msgctr_t块，在中断函数中处理ttl和timeout，create acoral_msgctr_t 时加到该链表中
+acoral_list_t g_msgctr_header; ///<全局-用来串系统中所有的acoral_msgctr_t块，在中断函数中处理ttl和timeout，create acoral_msgctr_t 时加到该链表中
 /*=============================
  *
  *  mssage 机制缓冲池初始化
@@ -19,8 +34,7 @@ acoral_queue_t g_msgctr_header; ///<全局-用来串系统中所有的acoral_msg
 void acoral_msg_sys_init()
 {
 	/*初始化全局事件列表头*/
-	acoral_init_list(&(g_msgctr_header.head));
-	g_msgctr_header.data = NULL;
+	acoral_init_list(&(g_msgctr_header));
 	acoral_msgctr_pool_ctrl.type = ACORAL_RES_MST;
 	acoral_msgctr_pool_ctrl.size = sizeof(acoral_msgctr_t);
 	acoral_msgctr_pool_ctrl.num_per_pool = 10;
@@ -92,7 +106,7 @@ acoral_msgctr_t *acoral_msgctr_create(unsigned int *err)
 	acoral_init_list(&msgctr->msglist);
 	acoral_init_list(&msgctr->waiting);
 
-	acoral_list_add2_tail(&msgctr->msgctr_list, &(g_msgctr_header.head));
+	acoral_list_add2_tail(&msgctr->msgctr_list, &(g_msgctr_header));
 	return msgctr;
 }
 

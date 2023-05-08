@@ -1,3 +1,17 @@
+/**
+ * @file mutex.c
+ * @author 王彬浩 (SPGGOGOGO@outlook.com)
+ * @brief kernel层，互斥量机制
+ * @version 1.0
+ * @date 2023-05-08
+ * @copyright Copyright (c) 2023
+ * @revisionHistory
+ *  <table>
+ *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
+ *   <tr><td> 0.1 <td>jivin <td> 2010-03-08 <td>Created
+ *   <tr><td> 1.0 <td>王彬浩 <td> 2023-05-08 <td>Standardized
+ *  </table>
+ */
 
 #include "event.h"
 #include "hal.h"
@@ -12,10 +26,7 @@ extern void acoral_evt_queue_del(acoral_thread_t *thread);
 extern void acoral_evt_queue_add(acoral_evt_t *evt,acoral_thread_t *new);
 
 acoral_thread_t *acoral_evt_high_thread(acoral_evt_t *evt);
-/*==============================
- *  The initialize of the mutex
- *       信号量初始化函数
- *==============================*/
+
 unsigned int acoral_mutex_init(acoral_evt_t *evt, unsigned char prio)
 {
 	if ((acoral_evt_t*)0 == evt)
@@ -33,7 +44,7 @@ unsigned int acoral_mutex_init(acoral_evt_t *evt, unsigned char prio)
  *  The creation of the mutex
  *       信号量创建函数
  *==============================*/
-acoral_evt_t *acoral_mutex_create(unsigned char prio, unsigned int *err)
+acoral_evt_t *acoral_mutex_create(unsigned char prio, unsigned int *err)//SPG这个和上面那个保留一个
 {
 	acoral_evt_t *evt;
 

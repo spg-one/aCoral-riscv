@@ -1,12 +1,18 @@
-/*============================
- * the realtime kernel  acoral
- *   name:  sem.c
- *   desp:  内核信号量相关函数
- *   auth:  pegasus 
- *   note:
- *
- *============================
+/**
+ * @file sem.h
+ * @author 王彬浩 (SPGGOGOGO@outlook.com)
+ * @brief kernel层，内核信号量相关函数
+ * @version 1.0
+ * @date 2023-04-21
+ * @copyright Copyright (c) 2023
+ * @revisionHistory 
+ *  <table> 
+ *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
+ *   <tr><td> 0.1 <td>jivin <td>2010-03-08 <td>Created 
+ *   <tr><td> 1.0 <td>王彬浩 <td> 2023-04-21 <td>Standardized 
+ *  </table>
  */
+
 
 #include "event.h"
 #include "thread.h"

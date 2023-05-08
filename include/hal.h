@@ -18,5 +18,4 @@
 #include "autocfg.h"
 #include "hal_int.h"
 #include "hal_thread.h"
-#include "hal_timer.h"
 #endif /* HAL_H_ */
