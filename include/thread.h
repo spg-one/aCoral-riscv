@@ -24,6 +24,8 @@
 #define ACORAL_MAX_PRIO_NUM ((CFG_MAX_THREAD + 1) & 0xff) ///<41。总共有40个线程，就有0~40共41个优先级
 #define ACORAL_MINI_PRIO CFG_MAX_THREAD ///<aCoral最低优先级40
 
+extern acoral_list_t acoral_threads_queue;
+
 enum acoralPrioEnum{
 	ACORAL_INIT_PRIO,	///<init线程独有的0优先级
 	ACORAL_MAX_PRIO,	///<aCoral系统中允许的最高优先级
@@ -37,8 +39,8 @@ enum acoralPrioEnum{
 };
 
 enum acoralPrioTypeEnum{
-	ACORAL_NONHARD_PRIO,	///<非硬实时任务的优先级，会将tcb中的prio加上ACORAL_NONHARD_RT_PRIO_MAX
-	ACORAL_HARD_PRIO	///<硬实时任务优先级，会将tcb中的prio加上ACORAL_HARD_RT_PRIO_MAX
+	ACORAL_NONHARD_PRIO, ///<非硬实时任务的优先级，会将tcb中的prio加上ACORAL_NONHARD_RT_PRIO_MAX
+	ACORAL_HARD_PRIO	 ///<硬实时任务优先级，会将tcb中的prio加上ACORAL_HARD_RT_PRIO_MAX
 };
 
 enum acoralThreadState{
@@ -58,7 +60,7 @@ enum acoralThreadState{
  * 
  * 
  */
-typedef struct{
+typedef struct{//SPG加注释
   	acoral_res_t res;	///<资源id，线程创建后作为线程id
 	unsigned char state;
 	unsigned char prio;
@@ -78,6 +80,8 @@ typedef struct{
 	void*	data;
 }acoral_thread_t;
 
+/***************线程控制API****************/
+
 /**
  * @brief 创建一个线程
  * 
@@ -91,29 +95,67 @@ typedef struct{
  * @return int 返回线程id
  */
 int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,void *stack,unsigned int sched_policy,void *data);
-void acoral_release_thread(acoral_res_t *thread);
+
+/**
+ * @brief 挂起当前线程
+ * 
+ */
 void acoral_suspend_self(void);
+
+/**
+ * @brief 挂起某个线程
+ * 
+ * @param thread_id 要挂起的线程id
+ */
 void acoral_suspend_thread_by_id(unsigned int thread_id);
-void acoral_suspend_thread(acoral_thread_t *thread);
+
+/**
+ * @brief 唤醒某个线程
+ * 
+ * @param thread_id 要唤醒的线程id
+ */
 void acoral_resume_thread_by_id(unsigned int thread_id);
-void acoral_resume_thread(acoral_thread_t *thread);
-unsigned int acoral_wait_thread(acoral_thread_t *thread);
-void acoral_delay_self(unsigned int ticks);
-void acoral_kill_thread(acoral_thread_t *thread);
+
+/**
+ * @brief 将当前线程延时
+ * 
+ * @param time 延时时间（毫秒）
+ */
+void acoral_delay_self(unsigned int time);
+
+/**
+ * @brief 干掉某个线程
+ * 
+ * @param id 要干掉的线程id
+ */
 void acoral_kill_thread_by_id(int id);
+
+/**
+ * @brief 结束当前线程
+ * 
+ */
 void acoral_thread_exit(void);
-void acoral_wake_waiting(acoral_thread_t *thread);
+
+/**
+ * @brief 改变当前线程优先级
+ * 
+ * @param prio 目标优先级
+ */
+void acoral_change_prio_self(unsigned int prio);
+
+void acoral_release_thread(acoral_res_t *thread);
+void acoral_suspend_thread(acoral_thread_t *thread);
+void acoral_resume_thread(acoral_thread_t *thread);
+void acoral_kill_thread(acoral_thread_t *thread);
 unsigned int acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args),void (*exit)(void),void *args);
 acoral_thread_t *acoral_alloc_thread(void);
 void acoral_thread_pool_init(void);
-void acoral_waitqueue_del(acoral_thread_t *thread);
 void acoral_thread_sys_init(void);
 void acoral_unrdy_thread(acoral_thread_t *thread);
 void acoral_rdy_thread(acoral_thread_t *thread);
 void acoral_thread_move2_tail_by_id(int thread_id);
 void acoral_thread_move2_tail(acoral_thread_t *thread);
-extern acoral_list_t acoral_threads_queue;
 void acoral_thread_change_prio(acoral_thread_t* thread, unsigned int prio);
-void acoral_change_prio_self(unsigned int prio);
+
 #endif
 

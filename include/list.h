@@ -32,7 +32,20 @@ typedef struct acoral_list acoral_list_t;
 
 #define acoral_list_empty(head) ((head)->next==(head))
 
+/**
+ * @brief 往list中添加节点（头插法）
+ * 
+ * @param new 要插入的节点
+ * @param head 目标list头节点
+ */
 void acoral_list_add(acoral_list_t *new, acoral_list_t *head);
+
+/**
+ * @brief 往list中添加节点（尾插法）
+ * 
+ * @param new 要插入的节点
+ * @param head 目标list头节点
+ */
 void acoral_list_add2_tail(acoral_list_t *new, acoral_list_t *head);
 
 /**

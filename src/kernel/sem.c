@@ -5,14 +5,13 @@
  * @version 1.0
  * @date 2023-04-21
  * @copyright Copyright (c) 2023
- * @revisionHistory 
- *  <table> 
- *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容 
- *   <tr><td> 0.1 <td>jivin <td>2010-03-08 <td>Created 
- *   <tr><td> 1.0 <td>王彬浩 <td> 2023-04-21 <td>Standardized 
+ * @revisionHistory
+ *  <table>
+ *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
+ *   <tr><td> 0.1 <td>jivin <td>2010-03-08 <td>Created
+ *   <tr><td> 1.0 <td>王彬浩 <td> 2023-04-21 <td>Standardized
  *  </table>
  */
-
 
 #include "event.h"
 #include "thread.h"
@@ -24,25 +23,22 @@
 #include <stdio.h>
 
 extern void acoral_evt_queue_del(acoral_thread_t *thread);
-extern void acoral_evt_queue_add(acoral_evt_t *evt,acoral_thread_t *new);
+extern void acoral_evt_queue_add(acoral_evt_t *evt, acoral_thread_t *new);
 acoral_thread_t *acoral_evt_high_thread(acoral_evt_t *evt);
-unsigned int *acoral_sem_init(acoral_evt_t *evt,unsigned int semNum)
+acoralSemRetValEnum acoral_sem_init(acoral_evt_t *evt, unsigned int semNum)
 {
 	if (NULL == evt)
 	{
-		return NULL;
+		return SEM_ERR_NULL;
 	}
-	semNum = 1 - semNum;  /* 拥有多个资源，0,一个  -1 两个， -2 三个 ....*/
+	semNum = 1 - semNum; /* 拥有多个资源，0,一个  -1 两个， -2 三个 ....*/
 	evt->count = semNum;
-	evt->type  = ACORAL_EVENT_SEM;
-	evt->data  = NULL;
+	evt->type = ACORAL_EVENT_SEM;
+	evt->data = NULL;
 	acoral_evt_init(evt);
 	return SEM_SUCCED;
 }
-/*============================
- *   the creation of signal
- *   计算信号量的创建
- *============================*/
+
 acoral_evt_t *acoral_sem_create(unsigned int semNum)
 {
 	acoral_evt_t *evt;
@@ -51,21 +47,17 @@ acoral_evt_t *acoral_sem_create(unsigned int semNum)
 	{
 		return NULL;
 	}
-	semNum = 1 - semNum;  /* 拥有多个资源，0,一个  -1 两个， -2 三个 ....*/
+	semNum = 1 - semNum; /* 拥有多个资源，0,一个  -1 两个， -2 三个 ....*/
 	evt->count = semNum;
-	evt->type  = ACORAL_EVENT_SEM;
-	evt->data  = NULL;
+	evt->type = ACORAL_EVENT_SEM;
+	evt->data = NULL;
 	acoral_evt_init(evt);
 	return evt;
 }
 
-/*============================
- *  the deletion of singal 
- *   计算信号量的删除
- *============================*/
-unsigned int acoral_sem_del(acoral_evt_t *evt, unsigned int opt)
+acoralSemRetValEnum acoral_sem_del(acoral_evt_t *evt)
 {
-	acoral_thread_t     *thread;
+	acoral_thread_t *thread;
 	if (acoral_intr_nesting)
 	{
 		return SEM_ERR_INTR;
@@ -73,12 +65,12 @@ unsigned int acoral_sem_del(acoral_evt_t *evt, unsigned int opt)
 	/* 参数检测*/
 	if (NULL == evt)
 		return SEM_ERR_NULL; /* error*/
-	if ( evt->type != ACORAL_EVENT_SEM )
+	if (evt->type != ACORAL_EVENT_SEM)
 		return SEM_ERR_TYPE; /* error*/
 
 	acoral_enter_critical();
-	thread =acoral_evt_high_thread(evt);
-	if (thread==NULL)
+	thread = acoral_evt_high_thread(evt);
+	if (thread == NULL)
 	{
 		/*队列上无等待任务*/
 		acoral_exit_critical();
@@ -93,13 +85,7 @@ unsigned int acoral_sem_del(acoral_evt_t *evt, unsigned int opt)
 	}
 }
 
-/*============================
- * the applition for singal 
- *  计算信号量的申请
- *  desp: count <= SEM_RES_AVAI  信号量有效 a++
- *        count >  SEM_RES_AVAI  信号量无效 a++ && thread suspend
- *============================*/
-unsigned int acoral_sem_trypend(acoral_evt_t *evt)
+acoralSemRetValEnum acoral_sem_trypend(acoral_evt_t *evt)
 {
 	if (acoral_intr_nesting)
 	{
@@ -119,7 +105,7 @@ unsigned int acoral_sem_trypend(acoral_evt_t *evt)
 	/* 计算信号量处理*/
 	acoral_enter_critical();
 	if ((char)evt->count <= SEM_RES_AVAI)
-	{   /* available*/
+	{ /* available*/
 		evt->count++;
 		acoral_exit_critical();
 		return SEM_SUCCED;
@@ -128,14 +114,7 @@ unsigned int acoral_sem_trypend(acoral_evt_t *evt)
 	return SEM_ERR_TIMEOUT;
 }
 
-
-/*============================
- * the applition for singal 
- *  计算信号量的申请
- *  desp: count <= SEM_RES_AVAI  信号量有效 a++
- *        count >  SEM_RES_AVAI  信号量无效 a++ && thread suspend
- *============================*/
-unsigned int acoral_sem_pend(acoral_evt_t *evt, unsigned int timeout)
+acoralSemRetValEnum acoral_sem_pend(acoral_evt_t *evt, unsigned int timeout)
 {
 	acoral_thread_t *cur = acoral_cur_thread;
 
@@ -157,7 +136,7 @@ unsigned int acoral_sem_pend(acoral_evt_t *evt, unsigned int timeout)
 	/* 计算信号量处理*/
 	acoral_enter_critical();
 	if ((char)evt->count <= SEM_RES_AVAI)
-	{   /* available*/
+	{ /* available*/
 		evt->count++;
 		acoral_exit_critical();
 		return SEM_SUCCED;
@@ -170,13 +149,13 @@ unsigned int acoral_sem_pend(acoral_evt_t *evt, unsigned int timeout)
 		cur->delay = TIME_TO_TICKS(timeout);
 		timeout_queue_add(cur);
 	}
-	acoral_evt_queue_add(evt,cur);
+	acoral_evt_queue_add(evt, cur);
 	acoral_exit_critical();
-	
+
 	acoral_sched();
 
 	acoral_enter_critical();
-	if(timeout>0 && cur->delay<=0)
+	if (timeout > 0 && cur->delay <= 0)
 	{
 		//--------------
 		// modify by pegasus 0804: count-- [+]
@@ -193,18 +172,12 @@ unsigned int acoral_sem_pend(acoral_evt_t *evt, unsigned int timeout)
 	return SEM_SUCCED;
 }
 
-/*===========================
- *  Release a signal
- *  计算信号量的释放
- *  desp: count > SEM_RES_NOAVAI 有等待线程 a-- && resume waiting thread.
- *        count <= SEM_RES_NOAVAI 无等待线程 a--
- *===========================*/
-unsigned int acoral_sem_post(acoral_evt_t *evt)
+acoralSemRetValEnum acoral_sem_post(acoral_evt_t *evt)
 {
-	acoral_thread_t     *thread;
+	acoral_thread_t *thread;
 
 	/* 参数检测*/
-	if ( NULL == evt)
+	if (NULL == evt)
 	{
 		return SEM_ERR_NULL; /* error*/
 	}
@@ -224,8 +197,8 @@ unsigned int acoral_sem_post(acoral_evt_t *evt)
 	}
 	/* 有等待线程*/
 	evt->count--;
-	thread =acoral_evt_high_thread(evt);
-	if (thread==NULL)
+	thread = acoral_evt_high_thread(evt);
+	if (thread == NULL)
 	{
 		/*应该有等待线程却没有找到*/
 		printf("Err Sem post\n");
@@ -241,11 +214,7 @@ unsigned int acoral_sem_post(acoral_evt_t *evt)
 	return SEM_SUCCED;
 }
 
-/*===================================
- *   get singal's number now
- *     得到当前信号量数目
- *===================================*/
-int acoral_sem_getnum(acoral_evt_t* evt)
+int acoral_sem_getnum(acoral_evt_t *evt)
 {
 	int t;
 	if (NULL == evt)
@@ -256,4 +225,3 @@ int acoral_sem_getnum(acoral_evt_t* evt)
 	acoral_exit_critical();
 	return t;
 }
-

@@ -23,7 +23,8 @@
 
 unsigned char acoral_need_sched; ///< aCoral是否需要调度标志，仅当aCoral就绪队列acoral_ready_queues有线程加入或被取下时，该标志被置为true；仅当aCoral在调度线程时，该标志位被置为false
 unsigned char sched_lock = 1;	 ///< aCoral初始化完成之前，调度都是被上锁的，即不允许调度。
-acoral_thread_t *acoral_cur_thread, *acoral_ready_thread;
+acoral_thread_t *acoral_cur_thread;		///<acoral当前运行的线程
+acoral_thread_t *acoral_ready_thread;	///<下一个将被调度运行的线程
 
 acoral_rdy_queue_t acoral_ready_queues; ///<aCoral就绪队列
 /* 之前是static acoral_rdy_queue_t acoral_ready_queues[HAL_MAX_CPU],*/
@@ -89,10 +90,7 @@ void acoral_set_running_thread(acoral_thread_t *thread)
 	acoral_cur_thread = thread;
 }
 
-/*================================
- * func: init acoral_ready_queues
- *    初始化各个核上的就绪队列
- *================================*/
+
 void acoral_thread_runqueue_init() //TODO多核队列？
 {
 	acoral_rdy_queue_t *rdy_queue;
@@ -101,10 +99,6 @@ void acoral_thread_runqueue_init() //TODO多核队列？
 	acoral_prio_queue_init(rdy_queue);
 }
 
-/*================================
- * func: add thread to acoral_ready_queues
- *    将线程挂到就绪队列上
- *================================*/
 void acoral_rdyqueue_add(acoral_thread_t *thread)
 {
 	acoral_rdy_queue_t *rdy_queue;
@@ -115,10 +109,6 @@ void acoral_rdyqueue_add(acoral_thread_t *thread)
 	acoral_set_need_sched(true);
 }
 
-/*================================
- * func: remove thread from acoral_ready_queues
- *    将线程从就绪队列上取下
- *================================*/
 void acoral_rdyqueue_del(acoral_thread_t *thread)
 {
 	acoral_rdy_queue_t *rdy_queue;
@@ -153,12 +143,6 @@ void acoral_sched()
 	HAL_SCHED_BRIDGE();
 	return;
 }
-
-/*================================
- * func: sched thread in acoral
- *        进程上下文调度实现
- *        这个函数必须是原子操作
- *================================*/
 void acoral_real_sched()
 {
 	acoral_thread_t *prev;
@@ -182,11 +166,6 @@ void acoral_real_sched()
 	}
 }
 
-/*================================
- * func: sched thread in acoral
- *        中断上下文调度实现
- *        这个函数必须是原子操作
- *================================*/
 void acoral_real_intr_sched()
 {
 	acoral_thread_t *prev;
@@ -210,10 +189,6 @@ void acoral_real_intr_sched()
 	}
 }
 
-/*================================
- * func: sched thread in acoral
- *     选择优先级最高的线程
- *================================*/
 void acoral_select_thread()
 {
 	unsigned int index;

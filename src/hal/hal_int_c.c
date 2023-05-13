@@ -52,7 +52,7 @@ void hal_intr_nesting_inc_comm()
 
 void hal_sched_bridge_comm()
 {
-	HAL_ENTER_CRITICAL();
+	HAL_ENTER_CRITICAL(); //SPG这里关了中断，线程切换后，新的线程不就默认是关中断的状态了么
 	acoral_real_sched();
 	HAL_EXIT_CRITICAL();
 }

@@ -41,10 +41,28 @@ typedef struct{
 void acoral_sched_init(void);
 void acoral_set_running_thread(acoral_thread_t *thread);
 void acoral_thread_runqueue_init(void);
+
+/**
+ * @brief 将某个线程挂载到就绪队列上
+ * 
+ * @param new 将被挂载的线程
+ */
 void acoral_rdyqueue_add(acoral_thread_t *new);
+
+/**
+ * @brief 从就绪队列上删除一个线程
+ * 
+ * @param old 要删除的线程
+ */
 void acoral_rdyqueue_del(acoral_thread_t *old);
-void acoral_sched(void);
+
+
+/**
+ * @brief 从就绪队列中选出优先级最高的线程，设为acoral_ready_thread
+ * 
+ */
 void acoral_select_thread(void);
+void acoral_sched(void);
 void acoral_real_sched();
 void acoral_real_intr_sched();
 #endif

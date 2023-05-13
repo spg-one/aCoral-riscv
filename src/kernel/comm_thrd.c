@@ -23,29 +23,6 @@
 
 acoral_sched_policy_t comm_policy; ///< 普通线程策略控制块
 
-int create_comm_thread(void (*route)(void *args), unsigned int stack_size, void *args, char *name, unsigned char prio)
-{
-	acoral_comm_policy_data_t policy_ctrl;
-	acoral_thread_t *thread;
-	/*分配tcb数据块*/
-	thread = acoral_alloc_thread();
-	if (thread == NULL)
-	{
-		printf("Alloc thread:%s fail\n", name);
-		printf("No Mem Space or Beyond the max thread\n");
-		return -1;
-	}
-	thread->name = name;
-	stack_size = stack_size & (~3);
-	thread->stack_size = stack_size;
-	thread->stack_buttom = NULL;
-	/*设置线程的优先级*/
-	policy_ctrl.prio = prio;
-	policy_ctrl.prio_type = ACORAL_NONHARD_PRIO;
-	thread->policy = ACORAL_SCHED_POLICY_COMM;
-	return comm_policy_thread_init(thread, route, args, &policy_ctrl);
-}
-
 int comm_policy_thread_init(acoral_thread_t *thread, void (*route)(void *args), void *args, void *data)
 {
 	unsigned int prio;

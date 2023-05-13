@@ -38,18 +38,6 @@ typedef struct{
 int comm_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data);
 
 /**
- * @brief 创建普通线程
- * 
- * @param route 执行线程的函数名
- * @param stack_size 线程的堆栈空间
- * @param args 传进线程的参数
- * @param name 创建线程的名字
- * @param prio 创建线程的优先级
- * @return int 
- */
-int create_comm_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,unsigned char prio);
-
-/**
  * @brief 注册普通机制
  * @note 调用时机为系统初始化阶段
  */

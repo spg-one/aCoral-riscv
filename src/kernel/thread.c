@@ -219,10 +219,10 @@ void acoral_kill_thread_by_id(int id){
 	acoral_kill_thread(thread);
 }
 
-/*================================
- * func: kill current thread in acoral
- *         	
- *================================*/
+/**
+ * @brief 结束当前线程
+ * 
+ */
 void acoral_thread_exit(){
         acoral_kill_thread(acoral_cur_thread);
 }

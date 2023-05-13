@@ -36,12 +36,42 @@ typedef struct {
 #define acoral_enter_critical() HAL_ENTER_CRITICAL()
 #define acoral_exit_critical() HAL_EXIT_CRITICAL()
 
-int acoral_intr_attach(int vector,void (*isr)(int));
-int acoral_intr_detach(int vector);
-void acoral_intr_entry(int vector);
-void acoral_intr_unmask(int vector);
-void acoral_intr_mask(int vector);
 void acoral_default_isr(int vector);
-void acoral_intr_exit(void);
 void acoral_intr_sys_init();
+
+/***************中断相关API****************/
+
+/**
+ * @brief 给某个plic中断绑定中断服务函数
+ * 
+ * @param vector 中断号
+ * @param isr 中断服务函数
+ * @return int 0 success
+ */
+int acoral_intr_attach(int vector,void (*isr)(int));
+
+/**
+ * @brief 给某个plic中断解绑中断服务函数，并换成aCoral默认的中断服务函数acoral_default_isr
+ * 
+ * @param vector 中断号
+ * @return int 0 success
+ */
+int acoral_intr_detach(int vector);
+
+/**
+ * @brief 使能某个中断
+ * 
+ * @param vector 中断号
+ * @return int 返回0成功，其它失败
+ */
+int acoral_intr_unmask(int vector);
+
+/**
+ * @brief 除能某个中断
+ * 
+ * @param vector 中断号
+ * @return int 返回0成功，其它失败
+ */
+int acoral_intr_mask(int vector);
+
 #endif
