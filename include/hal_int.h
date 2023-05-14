@@ -16,8 +16,8 @@
 #ifndef HAL_INT_H
 #define HAL_INT_H
 
-#define HAL_INTR_ENABLE()                  __asm volatile  ( "csrc mstatus,8" )
-#define HAL_INTR_DISABLE()                 __asm volatile  ( "csrs mstatus,8" )
+#define HAL_INTR_ENABLE()     __asm volatile  ( "csrc mstatus,8" )
+#define HAL_INTR_DISABLE()    __asm volatile  ( "csrs mstatus,8" )
 
 /**
  * @brief 使能中断。通过向中断屏蔽（INTMSK）寄存器某位写入0来打开相应中断，对中断复用进行了合并处理

@@ -57,7 +57,7 @@ void buddy_scan(void);
 
 #define acoral_malloc(size) buddy_malloc(size)
 #define acoral_free(ptr) buddy_free(ptr)
-#define acoral_malloc_size(size) buddy_malloc_size(size)
+#define acoral_malloc_adjust_size(size) buddy_malloc_size(size)
 #define acoral_mem_init(start,end) buddy_init(start,end)
 #define acoral_mem_scan() buddy_scan()
 
@@ -107,10 +107,10 @@ void buddy_scan(void);
 #define BLOCK_SET_FREE(ptr,size) (*ptr=(size<<SIZE_BIT)|MAGIC)
 #define BLOCK_CLEAR(ptr) (*ptr=0)
 
-enum acoralMemAllocStateEnum{
+typedef enum{
    MEM_NO_ALLOC,  ///<内存系统状态定义：容量太小不可分配
    MEM_OK         ///<内存系统状态定义：容量足够可以分配
-};
+}acoralMemAllocStateEnum;
 
 /**
  * @brief 内存块层数结构体，用于回收内存块时，描述要回收的内存块的大小。
@@ -147,7 +147,7 @@ typedef struct{
 
 #define ACORAL_MAX_POOLS 40
 
-enum acoralResourceTypeEnum{
+typedef enum{
    ACORAL_RES_THREAD,
    ACORAL_RES_EVENT,
    ACORAL_RES_TIMER,
@@ -157,7 +157,7 @@ enum acoralResourceTypeEnum{
    */
    ACORAL_RES_MSG,
    ACORAL_RES_MST
-};
+}acoralResourceTypeEnum;
 
 /*------------------*/
 /* pegasus  0719*/
@@ -179,12 +179,12 @@ enum acoralResourceTypeEnum{
 #define ACORAL_RES_INDEX_MASK  0x00FFC000
 #define ACORAL_RES_ID_MASK     0x00FFFFFF
 
-enum acoralResourceReturnValEnum{
+typedef enum{
    ACORAL_RES_NO_RES,
    ACORAL_RES_NO_POOL,
    ACORAL_RES_NO_MEM,
    ACORAL_RES_MAX_POOL
-};
+}acoralResourceReturnValEnum;
 
 #define ACORAL_RES_TYPE(id) ((id&ACORAL_RES_TYPE_MASK)>>ACORAL_RES_TYPE_BIT) ///<根据资源ID获取某一资源数据块
 
@@ -260,7 +260,7 @@ acoral_pool_t *acoral_get_free_pool(void);
  * @note 创建的时机包括系统刚初始化时，以及系统中空闲资源池不够时
  *
  * @param pool_ctrl 某一类型资源池的控制块
- * @return unsigned int
+ * @return unsigned int 0成功
  */
 unsigned int acoral_create_pool(acoral_pool_ctrl_t *pool_ctrl);
 void acoral_pool_res_init(acoral_pool_t *pool);
@@ -275,7 +275,7 @@ void acoral_release_pool(acoral_pool_ctrl_t *pool_ctrl);
 
 
 /**
- * @brief 获取某一类型的资源
+ * @brief 获取某一类型的资源（tcb、event等）
  *
  * @param pool_ctrl 某一类型的资源池控制块
  * @return acoral_res_t*
@@ -285,7 +285,7 @@ acoral_res_t *acoral_get_res(acoral_pool_ctrl_t *pool_ctrl);
 /**
  * @brief 释放某一资源
  *
- * @param res 将要释放的资源
+ * @param res 要释放的资源
  */
 void acoral_release_res(acoral_res_t *res);
 

@@ -16,7 +16,6 @@
 
 #include "hal.h"
 #include "lsched.h"
-#include "error.h"
 #include "timer.h"
 #include "mem.h"
 #include "thread.h"
@@ -49,12 +48,6 @@ int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void 
 	return acoral_policy_thread_init(sched_policy,thread,route,args,data);
 }
 
-/*================================
- * func: release thread in acoral
- *	
- *   thread     
- *    
- *================================*/
 extern int daemon_id;
 void acoral_release_thread1(acoral_thread_t *thread){//SPG这个和acoral_release_thread有什么区别
 	acoral_list_t *head;
@@ -67,11 +60,6 @@ void acoral_release_thread1(acoral_thread_t *thread){//SPG这个和acoral_releas
 	acoral_rdy_thread(daem);
 }
 
-/*================================
- * func: release thread in acoral
- *	
- *   thread     
- *================================*/
 void acoral_release_thread(acoral_res_t *res){
 	acoral_thread_t *thread;
 	thread=(acoral_thread_t *)res;
@@ -80,13 +68,6 @@ void acoral_release_thread(acoral_res_t *res){
   	acoral_free((void *)thread->stack_buttom);
 	acoral_release_res((acoral_res_t *)thread);
 }
-
-
-/*================================
- * func: suspend thread in acoral
- *         	
- * thread(TCB) 	
- *================================*/
 
 void acoral_suspend_thread(acoral_thread_t *thread){
 	if(!(ACORAL_THREAD_STATE_READY&thread->state))
@@ -100,41 +81,19 @@ void acoral_suspend_thread(acoral_thread_t *thread){
 	acoral_sched();
 }
 
-/*================================
- * func: suspend thread in acoral
- *      	
- *================================*/
 void acoral_suspend_self(){
 	acoral_suspend_thread(acoral_cur_thread);
 }
-
-/*================================
- * func: suspend thread in acoral
- *      ID	
- *      thread_idID
- *================================*/
 
 void acoral_suspend_thread_by_id(unsigned int thread_id){
 	acoral_thread_t *thread=(acoral_thread_t *)acoral_get_res_by_id(thread_id);
 	acoral_suspend_thread(thread);
 }
 
-/*================================
- * func: resume thread in acoral
- *         	
- *   thread_idID
- *================================*/
-
 void acoral_resume_thread_by_id(unsigned int thread_id){
 	acoral_thread_t *thread=(acoral_thread_t *)acoral_get_res_by_id(thread_id);
 	acoral_resume_thread(thread);
 }
-
-/*================================
- * func: resume thread in acoral
- *         	
- * thread(TCB) 	
- *================================*/
 
 void acoral_resume_thread(acoral_thread_t *thread){
 	if(!(thread->state&ACORAL_THREAD_STATE_SUSPEND))
@@ -147,14 +106,6 @@ void acoral_resume_thread(acoral_thread_t *thread){
 	/**/
 	acoral_sched();
 }
-
-/*================================
- * func: delay thread in acoral
- *         	
- * thread(TCB) 	
- * timems	
- *      
- *================================*/
 
 static void acoral_delay_thread(acoral_thread_t* thread,unsigned int time){
 	unsigned int real_ticks;
@@ -170,20 +121,10 @@ static void acoral_delay_thread(acoral_thread_t* thread,unsigned int time){
 	acoral_delayqueue_add(&time_delay_queue,thread);
 }
 
-/*================================
- * func: delay current thread in acoral
- *         	
- * timems	
- *================================*/
 void acoral_delay_self(unsigned int time){
 	acoral_delay_thread(acoral_cur_thread,time);
 }
 
-/*================================
- * func: kill thread in acoral
- *         	
- * thread(TCB) 	
- *================================*/
 void acoral_kill_thread(acoral_thread_t *thread){
 	acoral_evt_t *evt;
 	acoral_enter_critical();
@@ -208,29 +149,16 @@ void acoral_kill_thread(acoral_thread_t *thread){
 	acoral_sched();
 }
 
-/*================================
- * func: kill thread in acoral
- *         	
- * thread_idID 	
- *================================*/
 void acoral_kill_thread_by_id(int id){
 	acoral_thread_t *thread;
 	thread=(acoral_thread_t *)acoral_get_res_by_id(id);
 	acoral_kill_thread(thread);
 }
 
-/**
- * @brief 结束当前线程
- * 
- */
 void acoral_thread_exit(){
         acoral_kill_thread(acoral_cur_thread);
 }
 
-/*===========================
- *    change thread's prio
- *    
- *===========================*/
 void acoral_thread_change_prio(acoral_thread_t* thread, unsigned int prio){
 	acoral_enter_critical();
 	if(thread->state&ACORAL_THREAD_STATE_READY){
@@ -242,28 +170,14 @@ void acoral_thread_change_prio(acoral_thread_t* thread, unsigned int prio){
 	acoral_exit_critical();
 }
 
-/*===========================
- *    change current thread's prio
- *    
- *===========================*/
 void acoral_change_prio_self(unsigned int prio){
 	acoral_thread_change_prio(acoral_cur_thread, prio);
 }
 
-/*===========================
- *    change thread's prio
- *    ID
- *===========================*/
 void acoral_thread_change_prio_by_id(unsigned int thread_id, unsigned int prio){
 	acoral_thread_t *thread=(acoral_thread_t *)acoral_get_res_by_id(thread_id);
 	acoral_thread_change_prio(thread, prio);
 }
-
-/*================================
- * func: ready thread in acoral
- *  ,
- * thread(TCB) 	
- *================================*/
 
 void acoral_rdy_thread(acoral_thread_t *thread){
 	if(!(ACORAL_THREAD_STATE_SUSPEND&thread->state))
@@ -271,13 +185,6 @@ void acoral_rdy_thread(acoral_thread_t *thread){
 
 	acoral_rdyqueue_add(thread);
 }
-
-/*================================
- * func: unready thread in acoral
- *     ,
- * thread(TCB) 	
- *
- *================================*/
 
 void acoral_unrdy_thread(acoral_thread_t *thread){
 	if(!(ACORAL_THREAD_STATE_READY&thread->state))
@@ -299,24 +206,10 @@ void acoral_thread_move2_tail_by_id(int thread_id){
 	acoral_thread_move2_tail(thread);
 }
 
-
-/*================================
- * func: alloc thread struct data in acoral
- *     TCB
- *================================*/
 acoral_thread_t *acoral_alloc_thread(){
   	return (acoral_thread_t *)acoral_get_res(&acoral_thread_pool_ctrl);
 }
 
-/*================================
- * func: init thread in acoral
- *	
- * in:   (*route)   
- * in:   (*exit)   (acoral_thread_exit)
- *       stack_size 
- *       args       
- *       name       
- *================================*/
 unsigned int acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args),void (*exit)(void),void *args){
 	unsigned int stack_size=thread->stack_size;
 	if(thread->stack_buttom==NULL){
@@ -344,10 +237,6 @@ unsigned int acoral_thread_init(acoral_thread_t *thread,void (*route)(void *args
 	return 0;
 }
 
-/*================================
- *      init tcb pool
- *      
- *================================*/
 void acoral_thread_pool_init(){
 	acoral_thread_pool_ctrl.type=ACORAL_RES_THREAD;
 	acoral_thread_pool_ctrl.size=sizeof(acoral_thread_t);

@@ -19,10 +19,10 @@
 #include "list.h"
 #include "thread.h"
 
-enum acoralSchedPolicyEnum{
+typedef enum{
 	ACORAL_SCHED_POLICY_COMM,
 	ACORAL_SCHED_POLICY_PERIOD
-};
+}acoralSchedPolicyEnum;
 
 /**
  * @brief 调度策略控制块
@@ -38,9 +38,18 @@ typedef struct{
 }acoral_sched_policy_t;
 
 void acoral_policy_delay_deal(void);
-void acoral_register_sched_policy(acoral_sched_policy_t *policy);
 acoral_sched_policy_t *acoral_get_policy_ctrl(unsigned char type);
 int acoral_policy_thread_init(unsigned int policy,acoral_thread_t *thread,void (*route)(void *args),void *args,void *data);
 void acoral_sched_policy_init(void);
 void acoral_policy_thread_release(acoral_thread_t *thread);
+
+/***************调度策略相关API****************/
+
+/**
+ * @brief 向aCoral中注册新的调度策略
+ * 
+ * @param policy 调度策略控制块指针
+ */
+void acoral_register_sched_policy(acoral_sched_policy_t *policy);
+
 #endif

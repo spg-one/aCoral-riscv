@@ -28,14 +28,47 @@ void acoral_time_sys_init();
 void acoral_time_init(void);
 void acoral_ticks_init(void);
 void acoral_ticks_entry(int vector);
-unsigned int acoral_get_ticks(void);
-void acoral_set_ticks(unsigned int time);
 void time_delay_deal(void);
+
+/**
+ * @brief 将线程挂到延时队列上
+ * 
+ */
 void acoral_delayqueue_add(acoral_list_t*, acoral_thread_t*);
-acoral_evt_t *acoral_alloc_evt(void);
+
+/**
+ * @brief 超时链表处理函数
+ * 
+ */
 void timeout_delay_deal(void);
+
+/**
+ * @brief 将线程挂到超时队列上
+ * 
+ */
 void timeout_queue_add(acoral_thread_t*);
+
+/**
+ * @brief 将线程从超时队列删除
+ * 
+ */
 void timeout_queue_del(acoral_thread_t*);
+
+/***************ticks相关API****************/
+
+/**
+ * @brief 设置aCoral心跳tick的值
+ * 
+ * @param time tick新值
+ */
+void acoral_set_ticks(unsigned int time);
+
+/**
+ * @brief 得到tick的值
+ * 
+ * @return tick的值
+ */
+unsigned int acoral_get_ticks(void);
 
 #endif
 

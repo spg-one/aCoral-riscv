@@ -38,6 +38,8 @@ typedef enum
     MUTEX_ERR_RDY
 } acoralMutexRetVal;
 
+/***************互斥量相关API****************/
+
 /**
  * @brief 初始化互斥量
  *

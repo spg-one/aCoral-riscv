@@ -79,10 +79,6 @@ void acoral_ticks_entry(int vector){
 	}
 }
 
-/*================================
- * func: add thread to  time_delay_queue 
- *    将线程挂到延时队列上
- *================================*/
 void acoral_delayqueue_add(acoral_list_t *queue, acoral_thread_t *new){
 	acoral_list_t   *tmp, *head;
 	acoral_thread_t *thread;
@@ -137,10 +133,6 @@ void time_delay_deal(){
 	}
 }
 
-/*================================
- *  
- *    将线程挂到超时队列上
- *================================*/
 void timeout_queue_add(acoral_thread_t *new)
 {
 	acoral_list_t   *tmp ,*head;
@@ -168,10 +160,6 @@ void timeout_queue_add(acoral_thread_t *new)
 	return;
 }
 
-/*================================
- *  
- *    将线程超时队列删除
- *================================*/
 void timeout_queue_del(acoral_thread_t *new)
 {
 	if (acoral_list_empty(&new->timeout))
@@ -180,11 +168,6 @@ void timeout_queue_del(acoral_thread_t *new)
 	return;
 }
 
-
-/*---------------------*/
-/*  超时链表处理函数*/
-/*   pegasus  0719*/
-/*---------------------*/
 void timeout_delay_deal()
 {
 	acoral_list_t *tmp, *tmp1, *head;

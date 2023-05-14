@@ -121,10 +121,6 @@ void acoral_rdyqueue_del(acoral_thread_t *thread)
 	acoral_set_need_sched(true);
 }
 
-/*================================
- * func: sched thread in acoral
- *         调度线程
- *================================*/
 void acoral_sched()
 {
 	/*如果不需要调度，则返回*/

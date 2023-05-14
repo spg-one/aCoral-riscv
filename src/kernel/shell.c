@@ -23,13 +23,13 @@
 #define MAX_ARGS_NUM 8
 acoral_shell_cmd_t *head_cmd,*tail_cmd;
 
-void parse_args(char *argstr, int *argc_p, char **argv, char** resid,enum parse_state *stacked)
+void parse_args(char *argstr, int *argc_p, char **argv, char** resid, parse_state *stacked)
 {
 	int argc = 0;
 	char c;
-	enum parse_state newState;
-	enum parse_state stacked_state=*stacked;
-	enum parse_state lastState = PS_WHITESPACE;
+	parse_state newState;
+	parse_state stacked_state=*stacked;
+	parse_state lastState = PS_WHITESPACE;
 
 	while ((c = *argstr) != 0&&argc<MAX_ARGS_NUM) {
 
@@ -115,7 +115,7 @@ void cmd_exe(char *buf){
 	int argc;
 	char *argv[MAX_ARGS_NUM];
 	char *resid;
-	enum parse_state stacked_state;
+	parse_state stacked_state;
 	while (*buf) {
 		memset(argv, 0, sizeof(argv));
 		parse_args(buf, &argc, argv, &resid,&stacked_state);

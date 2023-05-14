@@ -31,11 +31,11 @@ typedef enum
     SEM_ERR_TIMEOUT
 } acoralSemRetValEnum;
 
-enum acoralSemResAvailabiltyEnum
+typedef enum
 {
     SEM_RES_AVAI,
     SEM_RES_NOAVAI
-};
+}acoralSemResAvailabiltyEnum;
 
 /***************信号量相关API****************/
 

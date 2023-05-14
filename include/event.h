@@ -17,10 +17,10 @@
 #define ACORAL_EVENT_H
 #include "mem.h"
 
-enum acoralEventEnum{
+typedef enum{
 	ACORAL_EVENT_SEM,	///<信号量
 	ACORAL_EVENT_MUTEX	///<互斥量
-};
+}acoralEventEnum;
 
 /**
  * @brief aCoral事件event结构体

@@ -13,16 +13,15 @@
  *  </table>
  */
 
-
 #ifndef SHELL_H
 #define SHELL_H
 
-enum parse_state {
+typedef enum{
 	PS_WHITESPACE,
 	PS_TOKEN,
 	PS_STRING,
 	PS_ESCAPE
-};
+}parse_state;
 
 typedef struct acoral_shell_cmd_t acoral_shell_cmd_t;
 
@@ -32,14 +31,23 @@ typedef struct acoral_shell_cmd_t acoral_shell_cmd_t;
  * 
  */
 struct acoral_shell_cmd_t{
-	char *name;
-	void (*exe)(int argc,const char **);
-	char *comment;
-	acoral_shell_cmd_t *next;
+	char *name;							 ///<命令的名字（shell中输入的那个）
+	void (*exe)(int argc,const char **); ///<命令函数指针
+	char *comment;					 	 ///<命令的解释
+	acoral_shell_cmd_t *next;			 ///<创建的时候置位NULL就好
 };
 
 void acoral_shell_init(void);
-void add_command(acoral_shell_cmd_t *cmd);
 void acoral_shell_enter(void *args);
 void cmd_init(void);
+
+/***************shell API****************/
+
+/**
+ * @brief 添加shell命令，需要在cmd_init函数中调用
+ * 
+ * @param cmd shell命令结构体
+ */
+void add_command(acoral_shell_cmd_t *cmd);
+
 #endif

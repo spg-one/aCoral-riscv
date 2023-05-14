@@ -28,13 +28,34 @@ typedef struct {
 	void (*unmask)(int);	///<使能中断操作
 }acoral_intr_ctr_t;
 
+/**
+ * @brief aCoral全局中断打开
+ * 
+ */
 #define acoral_intr_enable() HAL_INTR_ENABLE()
+
+/**
+ * @brief aCoral全局中断关闭
+ * 
+ */
 #define acoral_intr_disable() HAL_INTR_DISABLE()
+
+/**
+ * @brief aCoral进入临界区（本质就是关中断）
+ * 
+ */
+#define acoral_enter_critical() HAL_ENTER_CRITICAL()
+
+/**
+ * @brief aCoral退出临界区（本质就是开中断）
+ * 
+ */
+#define acoral_exit_critical() HAL_EXIT_CRITICAL()
+
 #define acoral_intr_nesting HAL_GET_INTR_NESTING()
 #define acoral_intr_nesting_inc() HAL_INTR_NESTING_INC()
 #define acoral_intr_nesting_dec() HAL_INTR_NESTING_DEC()
-#define acoral_enter_critical() HAL_ENTER_CRITICAL()
-#define acoral_exit_critical() HAL_EXIT_CRITICAL()
+
 
 void acoral_default_isr(int vector);
 void acoral_intr_sys_init();

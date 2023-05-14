@@ -13,7 +13,6 @@
  *  </table>
  */
 
-
 #include "event.h"
 #include "hal.h"
 #include "thread.h"
@@ -21,16 +20,12 @@
 #include "int.h"
 #include "timer.h"
 #include "message.h"
-#include "error.h"
 #include <stdio.h>
 
 acoral_pool_ctrl_t acoral_msgctr_pool_ctrl;
 acoral_pool_ctrl_t acoral_msg_pool_ctrl;
-acoral_list_t g_msgctr_header; ///<全局-用来串系统中所有的acoral_msgctr_t块，在中断函数中处理ttl和timeout，create acoral_msgctr_t 时加到该链表中
-/*=============================
- *
- *  mssage 机制缓冲池初始化
- *=============================*/
+acoral_list_t g_msgctr_header; ///< 全局-用来串系统中所有的acoral_msgctr_t块，在中断函数中处理ttl和timeout，create acoral_msgctr_t 时加到该链表中
+
 void acoral_msg_sys_init()
 {
 	/*初始化全局事件列表头*/
@@ -49,10 +44,6 @@ void acoral_msg_sys_init()
 	acoral_pool_ctrl_init(&acoral_msg_pool_ctrl);
 }
 
-/*==============================
- *
- *  message 分配
- *==============================*/
 acoral_msgctr_t *acoral_alloc_msgctr()
 {
 	return (acoral_msgctr_t *)acoral_get_res(&acoral_msgctr_pool_ctrl);
@@ -63,10 +54,6 @@ acoral_msg_t *acoral_alloc_msg()
 	return (acoral_msg_t *)acoral_get_res(&acoral_msg_pool_ctrl);
 }
 
-/*==============================
- *
- *  message 等待队列增加
- *==============================*/
 void acoral_msgctr_queue_add(acoral_msgctr_t *msgctr,
 							 acoral_thread_t *thread)
 { /*需按优先级排序*/
@@ -85,11 +72,7 @@ void acoral_msgctr_queue_add(acoral_msgctr_t *msgctr,
 	acoral_list_add(&thread->waiting, q->prev);
 }
 
-/*==================================
- *
- *   消息创建
- *==================================*/
-acoral_msgctr_t *acoral_msgctr_create(unsigned int *err)
+acoral_msgctr_t *acoral_msgctr_create()
 {
 	acoral_msgctr_t *msgctr;
 
@@ -111,7 +94,7 @@ acoral_msgctr_t *acoral_msgctr_create(unsigned int *err)
 }
 
 acoral_msg_t *acoral_msg_create(
-	unsigned int n, unsigned int *err, unsigned int id,
+	unsigned int count, unsigned int id,
 	unsigned int nTtl /* = 0*/, void *dat /*= NULL*/)
 {
 	acoral_msg_t *msg;
@@ -122,17 +105,13 @@ acoral_msg_t *acoral_msg_create(
 		return NULL;
 
 	msg->id = id;	 /*消息标识*/
-	msg->n = n;		 /*消息被接收次数*/
+	msg->count = count;		 /*消息被接收次数*/
 	msg->ttl = nTtl; /*消息生存周期*/
 	msg->data = dat; /*消息指针*/
 	acoral_init_list(&msg->msglist);
 	return msg;
 }
 
-/*===================================
- *
- *   消息发送
- *===================================*/
 unsigned int acoral_msg_send(acoral_msgctr_t *msgctr, acoral_msg_t *msg)
 {
 	/*	if (acoral_intr_nesting > 0)
@@ -182,10 +161,6 @@ unsigned int acoral_msg_send(acoral_msgctr_t *msgctr, acoral_msg_t *msg)
 	return MSGCTR_SUCCED;
 }
 
-/*===================================
- *
- *  消息接收
- *===================================*/
 void *acoral_msg_recv(acoral_msgctr_t *msgctr,
 					  unsigned int id,
 					  unsigned int timeout,
@@ -222,12 +197,12 @@ void *acoral_msg_recv(acoral_msgctr_t *msgctr,
 		for (; p != q; q = q->next)
 		{
 			pmsg = list_entry(q, acoral_msg_t, msglist);
-			if ((pmsg->id == id) && (pmsg->n > 0))
+			if ((pmsg->id == id) && (pmsg->count > 0))
 			{
 				/*-----------------*/
 				/* 有接收消息*/
 				/*-----------------*/
-				pmsg->n--;
+				pmsg->count--;
 				/*-----------------*/
 				/* 延时列表删除*/
 				/*-----------------*/
@@ -270,10 +245,6 @@ void *acoral_msg_recv(acoral_msgctr_t *msgctr,
 	return NULL;
 }
 
-/*===================================
- *
- *  消息删除
- *===================================*/
 unsigned int acoral_msgctr_del(acoral_msgctr_t *pmsgctr, unsigned int flag)
 {
 	acoral_list_t *p, *q;
@@ -330,12 +301,6 @@ unsigned int acoral_msg_del(acoral_msg_t *pmsg)
 	return 0;
 }
 
-/*-----------------------------------------------------*/
-
-/*==========================
- *
- *  唤醒最高优先等待线程
- *==========================*/
 void wake_up_thread(acoral_list_t *head)
 {
 	acoral_list_t *p, *q;
@@ -348,10 +313,6 @@ void wake_up_thread(acoral_list_t *head)
 	acoral_rdy_thread(thread);
 }
 
-/*======================*/
-/**/
-/*  输出事件容器上全部消息*/
-/*======================*/
 void acoral_print_all_msg(acoral_msgctr_t *msgctr)
 {
 	acoral_list_t *p, *q;
