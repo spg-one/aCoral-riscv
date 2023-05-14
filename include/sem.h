@@ -40,7 +40,7 @@ enum acoralSemResAvailabiltyEnum
 /***************信号量相关API****************/
 
 /**
- * @brief 初始化一个信号量
+ * @brief 初始化信号量
  *
  * @param evt 信号量指针
  * @param semNum 信号量的初始值
@@ -49,7 +49,7 @@ enum acoralSemResAvailabiltyEnum
 acoralSemRetValEnum acoral_sem_init(acoral_evt_t *evt, unsigned int semNum);
 
 /**
- * @brief 创建信号量并初始化
+ * @brief 创建并初始化信号量
  *
  * @param semNum 信号量初始值
  * @return acoral_evt_t* 返回信号量指针
@@ -57,7 +57,7 @@ acoralSemRetValEnum acoral_sem_init(acoral_evt_t *evt, unsigned int semNum);
 acoral_evt_t *acoral_sem_create(unsigned int semNum);
 
 /**
- * @brief 删除一个信号量//SPG这个函数删了个寂寞？都没释放内存
+ * @brief 删除信号量//SPG这个函数删了个寂寞？都没释放内存
  *
  * @param evt 信号量指针
  * @return enum acoralSemRetValEnum
@@ -65,7 +65,7 @@ acoral_evt_t *acoral_sem_create(unsigned int semNum);
 acoralSemRetValEnum acoral_sem_del(acoral_evt_t *evt);
 
 /**
- * @brief 信号量的申请(非阻塞)
+ * @brief 获取信号量(非阻塞)
  *  desp: count <= SEM_RES_AVAI  信号量有效 a++
  *        count >  SEM_RES_AVAI  信号量无效 a++ && thread suspend
  *
@@ -75,7 +75,7 @@ acoralSemRetValEnum acoral_sem_del(acoral_evt_t *evt);
 acoralSemRetValEnum acoral_sem_trypend(acoral_evt_t *evt);
 
 /**
- * @brief 信号量的申请(阻塞式)
+ * @brief 获取信号量(阻塞式)
  *  desp: count <= SEM_RES_AVAI  信号量有效 a++
  *        count >  SEM_RES_AVAI  信号量无效 a++ && thread suspend
  *
@@ -86,7 +86,7 @@ acoralSemRetValEnum acoral_sem_trypend(acoral_evt_t *evt);
 acoralSemRetValEnum acoral_sem_pend(acoral_evt_t *evt, unsigned int timeout);
 
 /**
- * @brief 信号量的释放
+ * @brief 释放信号量
  *  desp: count > SEM_RES_NOAVAI 有等待线程 a-- && resume waiting thread.
  *        count <= SEM_RES_NOAVAI 无等待线程 a--
  *

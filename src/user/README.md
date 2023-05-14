@@ -19,10 +19,19 @@
 * acoral_intr_mask 除能某个中断
 ---
 ## 信号量相关
-* acoral_sem_init 初始化一个信号量
-* acoral_sem_create 创建信号量并初始化
-* acoral_sem_del 删除一个信号量
-* acoral_sem_trypend 信号量的申请(非阻塞)
-* acoral_sem_pend 信号量的申请(阻塞式)
-* acoral_sem_post 信号量的释放
+* acoral_sem_init 初始化信号量
+* acoral_sem_create 创建并初始化信号量
+* acoral_sem_del 删除信号量
+* acoral_sem_trypend 获取信号量(非阻塞)
+* acoral_sem_pend 获取信号量(阻塞式)
+* acoral_sem_post 释放信号量
 * acoral_sem_getnum 得到当前信号量值
+---
+## 互斥量相关
+* acoral_mutex_init 初始化互斥量
+* acoral_mutex_create 创建并初始化互斥量
+* acoral_mutex_del 删除互斥量
+* acoral_mutex_trypend 获取互斥量（非阻塞式）
+* acoral_mutex_pend 获取互斥量（优先级继承的优先级反转解决）
+* acoral_mutex_pend2 获取互斥量（优先级天花板的优先级反转解决）
+* acoral_mutex_post 释放互斥量
