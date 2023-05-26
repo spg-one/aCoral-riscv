@@ -1,2 +1,2 @@
 # aCoral-I RISC-V PlatformIO IDE version
-this version was no longer maintained due to the bad compatibility between PIO and k210
+This version was no longer maintained due to the bad compatibility between PIO and k210，please turn to [aCoral-riscv-cl](https://github.com/spg-one/aCoral-riscv-cl)
