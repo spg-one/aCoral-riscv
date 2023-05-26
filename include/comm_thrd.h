@@ -23,7 +23,7 @@
  */
 typedef struct{
 	unsigned char prio; 		///<优先级
-	unsigned char prio_type; 	///<优先级类型，有ACORAL_BASE_PRIO和ACORAL_ABSOLUTE_PRIO，后者表示优先级设定是多少就是多少，前者则需要根据系统需要在创建线程时进行调整
+	acoralPrioTypeEnum prio_type; 	///<线程优先级类型，包括硬实时任务ACORAL_HARD_PRIO、非硬实时任务ACORAL_NONHARD_PRIO
 }acoral_comm_policy_data_t;
 
 /**

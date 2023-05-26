@@ -17,7 +17,9 @@
 #define POLICY_H
 
 #include "list.h"
-#include "thread.h"
+// #include "thread.h"
+
+typedef struct acoral_thread_tcb acoral_thread_t; 
 
 typedef enum{
 	ACORAL_SCHED_POLICY_COMM,
@@ -39,7 +41,7 @@ typedef struct{
 
 void acoral_policy_delay_deal(void);
 acoral_sched_policy_t *acoral_get_policy_ctrl(unsigned char type);
-int acoral_policy_thread_init(unsigned int policy,acoral_thread_t *thread,void (*route)(void *args),void *args,void *data);
+int acoral_policy_thread_init(acoralSchedPolicyEnum policy,acoral_thread_t *thread,void (*route)(void *args),void *args,void *data);
 void acoral_sched_policy_init(void);
 void acoral_policy_thread_release(acoral_thread_t *thread);
 

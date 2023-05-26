@@ -21,8 +21,11 @@
 #include "bitops.h"
 #include <stdbool.h>
 
-unsigned char acoral_need_sched; ///< aCoral是否需要调度标志，仅当aCoral就绪队列acoral_ready_queues有线程加入或被取下时，该标志被置为true；仅当aCoral在调度线程时，该标志位被置为false
-unsigned char sched_lock = 1;	 ///< aCoral初始化完成之前，调度都是被上锁的，即不允许调度。
+/// aCoral是否需要调度标志，仅当aCoral就绪队列acoral_ready_queues有线程加入或被取下时，该标志被置为true；
+/// 当发生调度之后，该标志位被置为false，直到又有新的线程被就绪或者挂起
+unsigned char acoral_need_sched; 
+
+unsigned char sched_lock = true;	 ///< aCoral初始化完成之前，调度都是被上锁的，即不允许调度。
 acoral_thread_t *acoral_cur_thread;		///<acoral当前运行的线程
 acoral_thread_t *acoral_ready_thread;	///<下一个将被调度运行的线程
 
@@ -76,12 +79,6 @@ void acoral_prio_queue_init(acoral_rdy_queue_t *array)
 	}
 }
 
-void acoral_sched_init()
-{
-	sched_lock = 0;
-	acoral_set_need_sched(false);
-}
-
 
 void acoral_set_running_thread(acoral_thread_t *thread)
 {
@@ -106,7 +103,7 @@ void acoral_rdyqueue_add(acoral_thread_t *thread)
 	acoral_prio_queue_add(rdy_queue, thread->prio, &thread->ready);
 	thread->state &= ~ACORAL_THREAD_STATE_SUSPEND;
 	thread->state |= ACORAL_THREAD_STATE_READY;
-	acoral_set_need_sched(true);
+	acoral_need_sched = true;
 }
 
 void acoral_rdyqueue_del(acoral_thread_t *thread)
@@ -118,7 +115,7 @@ void acoral_rdyqueue_del(acoral_thread_t *thread)
 	thread->state &= ~ACORAL_THREAD_STATE_RUNNING;
 	thread->state |= ACORAL_THREAD_STATE_SUSPEND;
 	/*设置线程所在的核可调度*/
-	acoral_set_need_sched(true);
+	acoral_need_sched = true;
 }
 
 void acoral_sched()
@@ -143,7 +140,7 @@ void acoral_real_sched()
 {
 	acoral_thread_t *prev;
 	acoral_thread_t *next;
-	acoral_set_need_sched(false);
+	acoral_need_sched = false;
 	prev = acoral_cur_thread;
 	/*选择最高优先级线程*/
 	acoral_select_thread();
@@ -166,7 +163,7 @@ void acoral_real_intr_sched()
 {
 	acoral_thread_t *prev;
 	acoral_thread_t *next;
-	acoral_set_need_sched(false);
+	acoral_need_sched = false;
 	prev = acoral_cur_thread;
 	/*选择最高优先级线程*/
 	acoral_select_thread();

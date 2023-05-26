@@ -24,7 +24,7 @@
  */
 typedef struct{
 	unsigned char prio; 		///<线程优先级
-	unsigned char prio_type; 	///<线程优先级类型，包括绝对(硬实时任务)、相对（非硬实时任务）等
+	acoralPrioTypeEnum prio_type; 	///<线程优先级类型，包括硬实时任务ACORAL_HARD_PRIO、非硬实时任务ACORAL_NONHARD_PRIO
 	unsigned int time; 			///<线程周期，单位为毫秒
 }acoral_period_policy_data_t;
 

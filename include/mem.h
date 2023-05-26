@@ -81,7 +81,7 @@ void buddy_scan(void);
    void v_mem_init(void);
    void v_mem_scan(void);
    #define acoral_mem_init2() v_mem_init()
-   #define acoral_malloc2(size) v_malloc(size)
+   #define acoral_malloc2(size) v_malloc(size) //SPG有问题
    #define acoral_free2(p) v_free(p)
    #define acoral_mem_scan2() v_mem_scan()
 #endif

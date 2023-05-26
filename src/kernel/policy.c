@@ -35,7 +35,7 @@ acoral_sched_policy_t *acoral_get_policy_ctrl(unsigned char type){
 	return NULL;
 }
 
-int acoral_policy_thread_init(unsigned int policy,acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
+int acoral_policy_thread_init(acoralSchedPolicyEnum policy,acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
 	acoral_sched_policy_t   *policy_ctrl;
 	policy_ctrl=acoral_get_policy_ctrl(policy);	
 	if(policy_ctrl==NULL||policy_ctrl->policy_thread_init==NULL){

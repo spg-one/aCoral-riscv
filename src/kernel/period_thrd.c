@@ -21,6 +21,7 @@
 #include "period_thrd.h"
 #include "int.h"
 #include <stdio.h>
+#include "lsched.h"
 
 acoral_list_t period_delay_queue; ///<周期线程专用延时队列，只要是周期线程，就会被挂载到这个队列上，延时时间就是周期，每次周期过后重新挂载
 int period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),void *args,void *data){
@@ -43,7 +44,7 @@ int period_policy_thread_init(acoral_thread_t *thread,void (*route)(void *args),
 		// }
 		// }
 		thread->prio=prio;
-		private_data=(period_private_data_t *)acoral_malloc2(sizeof(period_private_data_t));
+		private_data=(period_private_data_t *)acoral_malloc(sizeof(period_private_data_t));
 		if(private_data==NULL){
 			printf("No level2 mem space for private_data:%s\n",thread->name);
 			acoral_enter_critical();
@@ -103,6 +104,7 @@ void period_thread_delay(acoral_thread_t* thread,unsigned int time){
 }
 
 void period_delay_deal(){
+	int need_re_sched= 0;
 	acoral_list_t *tmp,*tmp1,*head;
 	acoral_thread_t * thread;
 	period_private_data_t * private_data;
@@ -124,8 +126,13 @@ void period_delay_deal(){
 			thread->stack=(unsigned int *)((char *)thread->stack_buttom+thread->stack_size-4);
 			thread->stack = HAL_STACK_INIT(thread->stack,private_data->route,period_thread_exit,private_data->args);
 			acoral_rdy_thread(thread);
+			need_re_sched = 1;
 		}
 		period_thread_delay(thread,private_data->time);
+		if(need_re_sched)
+		{
+			acoral_sched();//SPG我是小丑，时钟中断里不能调度的，应该在把中断退出函数加回来
+		}
 	}
 }
 

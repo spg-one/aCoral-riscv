@@ -20,6 +20,7 @@
 #include "list.h"
 #include "mem.h"
 #include "event.h"
+#include "policy.h"
 
 #define ACORAL_MAX_PRIO_NUM ((CFG_MAX_THREAD + 1) & 0xff) ///<41。总共有40个线程，就有0~40共41个优先级
 #define ACORAL_MINI_PRIO CFG_MAX_THREAD ///<aCoral最低优先级40
@@ -44,13 +45,12 @@ typedef enum{
 }acoralPrioTypeEnum;
 
 typedef enum{
-	ACORAL_THREAD_STATE_READY = 1,
-	ACORAL_THREAD_STATE_SUSPEND = 1<<1,
-	ACORAL_THREAD_STATE_RUNNING = 1<<2,
-	ACORAL_THREAD_STATE_EXIT = 1<<3,
-	ACORAL_THREAD_STATE_RELEASE = 1<<4,
-	ACORAL_THREAD_STATE_DELAY = 1<<5,
-	ACORAL_THREAD_STATE_MOVE = 1<<6
+	ACORAL_THREAD_STATE_READY = 1,			///表示线程已经被挂载到acoral_ready_queues，就绪状态
+	ACORAL_THREAD_STATE_SUSPEND = 1<<1,		///表示线程已经被从acoral_ready_queues取下，挂起状态
+	ACORAL_THREAD_STATE_RUNNING = 1<<2, 	///表示线程正在运行
+	ACORAL_THREAD_STATE_EXIT = 1<<3,		///表示线程已经运行完毕，等待被切换彻底送走
+	ACORAL_THREAD_STATE_RELEASE = 1<<4,		///表示线程已经运行完毕并已经被切换，等待daem回收TCB和堆栈资源
+	ACORAL_THREAD_STATE_DELAY = 1<<5,		///表示线程将在一段时间之后被重新唤醒并挂载到acoral_ready_queues上，对于普通线程来说，就是调用了delay接口，对于周期线程来说，就是周期
 }acoralThreadStateEnum;
 
 typedef enum{
@@ -66,11 +66,11 @@ typedef enum{
  * 
  * 
  */
-typedef struct{//SPG加注释
+typedef struct acoral_thread_tcb{//SPG加注释
   	acoral_res_t res;	///<资源id，线程创建后作为线程id
-	unsigned char state;
+	acoralThreadStateEnum state;
 	unsigned char prio;
-	unsigned char policy;
+	acoralSchedPolicyEnum policy;
 	acoral_list_t ready;	///<用于挂载到全局就绪队列
 	acoral_list_t timeout;
 	acoral_list_t waiting;
@@ -86,6 +86,22 @@ typedef struct{//SPG加注释
 	void*	data;
 }acoral_thread_t;
 
+/**
+ * @brief 这个函数只是在线程执行完毕或者被杀死的时候，让线程进入ACORAL_THREAD_STATE_EXIT状态。
+ * 		  虽然这个时候线程已经结束嘞，但是知道发送上下文切换彻底送走这个死掉的线程之前，TCB和堆栈还有用处，比如函数调用还用得到堆栈，所以这个时候还不能被daem回收释放。
+ * 		  所以进入ACORAL_THREAD_STATE_EXIT状态的的线程要等到被切换到新线程的上下文之后，才会变成ACORAL_THREAD_STATE_RELEASE状态，这个状态下的线程才会被daem释放。
+ * 		  详见绿书P98.
+ * 		  
+ * 
+ * @param thread 线程指针
+ */
+void acoral_release_thread1(acoral_thread_t *thread);
+
+/**
+ * @brief daem线程用来释放tcb空间的
+ * 
+ * @param thread 线程指针
+ */
 void acoral_release_thread(acoral_res_t *thread);
 void acoral_suspend_thread(acoral_thread_t *thread);
 void acoral_resume_thread(acoral_thread_t *thread);
@@ -114,7 +130,7 @@ void acoral_thread_change_prio(acoral_thread_t* thread, unsigned int prio);
  * @param data 线程策略数据
  * @return int 返回线程id
  */
-int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,void *stack,unsigned int sched_policy,void *data);
+int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,void *stack,acoralSchedPolicyEnum sched_policy,void *data);
 
 /**
  * @brief 挂起当前线程

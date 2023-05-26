@@ -28,7 +28,7 @@ extern void acoral_evt_queue_del(acoral_thread_t *thread);
 acoral_list_t acoral_threads_queue; ///<aCoral全局所有线程队列
 acoral_pool_ctrl_t acoral_thread_pool_ctrl;
 
-int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,void *stack,unsigned int sched_policy,void *data){
+int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void *args,char *name,void *stack,acoralSchedPolicyEnum sched_policy,void *data){
 	acoral_thread_t *thread;
         /*分配tcb数据块*/
 	thread=acoral_alloc_thread();
@@ -49,7 +49,8 @@ int acoral_create_thread(void (*route)(void *args),unsigned int stack_size,void 
 }
 
 extern int daemon_id;
-void acoral_release_thread1(acoral_thread_t *thread){//SPG这个和acoral_release_thread有什么区别
+
+void acoral_release_thread1(acoral_thread_t *thread){
 	acoral_list_t *head;
 	acoral_thread_t *daem;
 	thread->state=ACORAL_THREAD_STATE_EXIT;
@@ -70,7 +71,7 @@ void acoral_release_thread(acoral_res_t *res){
 }
 
 void acoral_suspend_thread(acoral_thread_t *thread){
-	if(!(ACORAL_THREAD_STATE_READY&thread->state))
+	if(!(ACORAL_THREAD_STATE_READY&thread->state)) //SPG挂起一个线程等价于把线程从acoral_ready_queues上取下，这就意味着这个线程必须之前在acoral_ready_queues上，也就等价于必须是就绪状态的线程才能被挂起
 		return;
 
 	acoral_enter_critical();
@@ -180,7 +181,7 @@ void acoral_thread_change_prio_by_id(unsigned int thread_id, unsigned int prio){
 }
 
 void acoral_rdy_thread(acoral_thread_t *thread){
-	if(!(ACORAL_THREAD_STATE_SUSPEND&thread->state))
+	if(!(ACORAL_THREAD_STATE_SUSPEND&thread->state)) //SPG线程必须要不在就绪队列上（有suspend状态）才能被就绪（加入就绪队列）
 		return;
 
 	acoral_rdyqueue_add(thread);

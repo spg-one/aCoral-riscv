@@ -1,21 +1,4 @@
 /**
- * @mainpage aCoral-I源码文档
- * @section 简介
- * 珊瑚aCoral单核版本源码文档，对源码中的文件、函数、变量等进行了详细说明，适合初学者阅读，用以加深对aCoral-I的理解。\n
- * 配合《珊瑚-I 内核手册》食用更香哦。
- * @author 王彬浩 (SPGGOGOGO@outlook.com)
- * @version 1.0
- * @date 2022-06-24
- * @copyright Copyright (c) 2023
- * @revisionHistory
- *  <table>
- *   <tr><th> 版本 <th>作者 <th>日期 <th>修改内容
- *   <tr><td> 0.1 <td>jivin <td>2010-03-08 <td>Created
- *   <tr><td> 1.0 <td>王彬浩 <td> 2022-06-24 <td>Standardized
- *  </table>
- */
-
-/**
  * @file core.c
  * @author 王彬浩 (SPGGOGOGO@outlook.com)
  * @brief kernel层，aCoral内核初始化文件，紧接start.S
@@ -39,6 +22,7 @@
 acoral_list_t acoral_res_release_queue; ///< 将被daem线程回收的线程队列
 volatile unsigned int acoral_start_sched = false;
 int daemon_id, idle_id, init_id;
+extern void user_main();
 
 void idle(void *args)
 {
@@ -97,8 +81,9 @@ void init(void *args)
 			;
 			/*应用级相关服务初始化,应用级不要使用延时函数，没有效果的*/
 #ifdef CFG_SHELL
-	acoral_shell_init();
+	// acoral_shell_init();
 #endif
+	user_main();
 	printf("init done\n");
 }
 
@@ -142,9 +127,10 @@ void acoral_core_cpu_start()
 
 void acoral_start_os()
 {
-	acoral_sched_init();
+	sched_lock = false;
+	acoral_need_sched = false; 
 	acoral_select_thread();
-	acoral_set_running_thread(acoral_ready_thread); // SPG空指针
+	acoral_set_running_thread(acoral_ready_thread); // SPG可能存在空指针
 	HAL_SWITCH_TO(&acoral_cur_thread->stack);
 }
 
@@ -169,8 +155,4 @@ void acoral_module_init()
 	/*事件管理系统初始化*/
 	acoral_evt_sys_init();
 	printf("evt_sys_init done\n");
-#ifdef CFG_DRIVER
-	/*驱动管理系统初始化*/
-	// acoral_drv_sys_init();
-#endif
 }
